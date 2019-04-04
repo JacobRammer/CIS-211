@@ -1,12 +1,5 @@
-"""
-# TODO Title
-CIS 210 W19 Project #
-
-Author: [Jacob Rammer]
-
-Credits: [N/A]
-
-# TODO Description
+"""Jacob Rammer
+Point class
 """
 
 
