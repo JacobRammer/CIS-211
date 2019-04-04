@@ -34,24 +34,20 @@ class Appt:
         self.finish = finish
         self.desc = desc
 
-        def __eq__(self, other: "Appt") -> bool:
-            """Equality means same time period, ignoring description"""
+    def __eq__(self, other: "Appt") -> bool:
+        """Equality means same time period, ignoring description"""
 
-            return self.start == other.start and self.finish == other.finish
+        return self.start == other.start and self.finish == other.finish
 
-        # def __eq__(self, other: 'Appt') -> bool:
-        #     """Equality means same time period, ignoring description"""
-        #     return self.start == other.start and self.finish == other.finish
+    def __lt__(self, other: "Appt") -> bool:
+        """Check to see if appointment occurs before"""
 
-        def __lt__(self, other: "Appt") -> bool:
-            """Check to see if appointment occurs before"""
+        return self.finish < other.finish
 
-            return self.finish < other.finish
+    def __gt__(self, other: "Appt") -> bool:
+        """Check to see if appointment occurs after each other"""
 
-        def __gt__(self, other: "Appt") -> bool:
-            """Check to see if appointment occurs after each other"""
-
-            return self.start > other.start
+        return self.start > other.start
 
 
 class Agenda:
