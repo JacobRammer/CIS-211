@@ -1,12 +1,8 @@
 """
-# TODO Title
-CIS 210 W19 Project #
+CIS 211
+Jacob Rammer
 
-Author: [Jacob Rammer]
-
-Credits: [N/A]
-
-# TODO Description
+Point class mini project
 """
 
 
@@ -20,7 +16,7 @@ class Point:
         self.y = y
 
     def move(self, dx: int, dy: int):
-        """Move x by dx value and y by dy value"""
+        """Move to (x + dx, y + dy)"""
 
         self.x += dx
         self.y += dy
