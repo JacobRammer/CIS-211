@@ -72,7 +72,7 @@ class Appt:
         return Appt(other.start, self.finish, f" | {self.desc} and {other.desc}")
 
 
-class Agenda:
+class Agenda(list):
     """An Agenda is a collection of appointments.
     It has most of the methods of a list, such as
     'append' and iteration, and in
@@ -98,3 +98,30 @@ class Agenda:
     Conflicts:
     2018-03-15 15:00 15:30 | Early afternoon nap and Coffee break
     """
+
+    def text(self) -> str:
+        """Returns a string in the same form as we expect to find in the input file.
+        Note that this is different from the __str__ method inherited from "list", which is still
+        available
+        """
+
+        as_list = [str(appt) for appt in self]
+        return "\n".join(as_list)
+
+    def conflicts(self) -> "Agenda":
+        """Returns the agenda consisting of the conflicts (overlaps) between this agenda and the other.
+        Side effect: This agenda is sorted"""
+
+        # TODO
+
+    def sort(self, key=lambda appt: appt.start, reverse=False):
+        """We sort by a start time unless another sort key is given"""
+
+        super().sort(key=key, reverse=reverse)
+
+    def unconflicted(self) -> bool:
+        """True if none of the appointments in this agenda overlap.
+        Side effect: Agenda is sorted
+        """
+
+        return len(self.conflicts()) == 0
