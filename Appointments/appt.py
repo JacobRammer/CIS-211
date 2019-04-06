@@ -48,7 +48,53 @@ class Appt:
         """Check to see if appointment occurs after each other"""
 
         return self.start > other.start
+    def __str__(self) -> str:
+        """The textual format of an appointment is yyyy-mm-dd:mm hh:mm | description
+        Note: that this is accurate only if start and finish are on the same day
+        """
+
+        date_iso = self.start.date().isoformat()
+        start_iso = self.start.time().isoformat(timespec='minutes')
+        finish_iso = self.finish.time().isoformat(timespec='minutes')
+
+        return f"{date_iso} {start_iso} {finish_iso} | {self.desc}"
+
+    def overlaps(self, other: "Appt") -> bool:
+        """Is there a non-zero overlap between these two periods? ie: app1 ends after app2 starts"""
+
+        return self.finish.__gt__(other.start)
+
+    def intersect(self, other: "Appt") -> "Appt":
+        """Display the overlap time between two appointments if there are overlaps"""
+
+        # print("Oh no, a conflict in the schedule!")  # TODO uncomment
+
+        return Appt(other.start, self.finish, f" | {self.desc} and {other.desc}")
 
 
 class Agenda:
-    """TODO"""
+    """An Agenda is a collection of appointments.
+    It has most of the methods of a list, such as
+    'append' and iteration, and in
+    addition it has a few special methods, including
+    a method for finding conflicting appointments.
+
+    Usage:
+    appt1 = Appt(datetime(2018, 3, 15, 13, 30), datetime(2018, 3, 15, 15, 30), "Early afternoon nap")
+    appt2 = Appt(datetime(2018, 3, 15, 15, 00), datetime(2018, 3, 15, 16, 00), "Coffee break")
+    agenda = Agenda()
+    agenda.append(appt1)
+    agenda.append(appt2)
+    if agenda.unconflicted():
+        print(f"Agenda has no conflicts")
+    else:
+        print(f"In agenda:\n{agenda.text()}")
+        print(f"Conflicts:\n {agenda.conflicts().text()}")
+
+    Expected output:
+    In agenda:
+    2018-03-15 13:30 15:30 | Early afternoon nap
+    2018-03-15 15:00 16:00 | Coffee break
+    Conflicts:
+    2018-03-15 15:00 15:30 | Early afternoon nap and Coffee break
+    """
