@@ -48,6 +48,7 @@ class Appt:
         """Check to see if appointment occurs after each other"""
 
         return self.start > other.start
+
     def __str__(self) -> str:
         """The textual format of an appointment is yyyy-mm-dd:mm hh:mm | description
         Note: that this is accurate only if start and finish are on the same day
@@ -112,7 +113,22 @@ class Agenda(list):
         """Returns the agenda consisting of the conflicts (overlaps) between this agenda and the other.
         Side effect: This agenda is sorted"""
 
-        # TODO
+        conflicts = Agenda()
+        self.sort()
+        start_range = 1
+        print(len(self))
+        for appt in range(len(self)):
+            i_elem = self[appt]
+            # j_elem = self[start_range]
+            for j in range(appt + 1, len(self)):
+                j_elem = self[j]
+                if i_elem.overlaps(j_elem):
+                    conflict = i_elem.intersect(j_elem)
+                    conflicts.append(conflict)
+                elif not i_elem.overlaps(j_elem):
+                    break
+        # start_range += 1
+        return conflicts
 
     def sort(self, key=lambda appt: appt.start, reverse=False):
         """We sort by a start time unless another sort key is given"""
