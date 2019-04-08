@@ -29,7 +29,7 @@ class Appt:
         """An appointment from start time to end time with a descriptions, desc.
         Start and finish should be the time of day.
         """
-        assert finish > start, f"Period finish ({finish}) must be after start ({start}"
+        assert finish > start, f"Period finish ({finish}) must be after start ({start})"
         self.start = start
         self.finish = finish
         self.desc = desc
@@ -115,19 +115,17 @@ class Agenda(list):
 
         conflicts = Agenda()
         self.sort()
-        start_range = 1
-        print(len(self))
-        for appt in range(len(self)):
-            i_elem = self[appt]
-            # j_elem = self[start_range]
-            for j in range(appt + 1, len(self)):
-                j_elem = self[j]
-                if i_elem.overlaps(j_elem):
-                    conflict = i_elem.intersect(j_elem)
+
+        for appt1 in range(len(self)):
+            appt1_index = self[appt1]
+            for appt2 in range(appt1 + 1, len(self)):
+                appt2_index = self[appt2]
+                if appt1_index.overlaps(appt2_index):
+                    conflict = appt1_index.intersect(appt2_index)
                     conflicts.append(conflict)
-                elif not i_elem.overlaps(j_elem):
+                elif not appt1_index.overlaps(appt2_index):
                     break
-        # start_range += 1
+
         return conflicts
 
     def sort(self, key=lambda appt: appt.start, reverse=False):
