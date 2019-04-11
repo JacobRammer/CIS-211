@@ -7,7 +7,7 @@ Sweep mini project
 def all_same(l: list) -> bool:
     """Check to see if all elements in a list are the same"""
 
-    if len(l) != 1:
+    if len(l) > 1:
         for i in l:
             if i == l[0]:
                 pass
@@ -17,7 +17,7 @@ def all_same(l: list) -> bool:
 
 
 def dedup(l: list) -> list:
-    """TODO"""
+    """Remove duplicates in a list the occur simultaneously"""
 
     index = 0
     deduped_index = 0
@@ -27,7 +27,7 @@ def dedup(l: list) -> list:
         deduped_list.append(l[0])
 
         for i in l:
-            if l[index] == deduped_list[deduped_index]:
+            if l[index] == deduped_list[deduped_index]:  # check next element against element in deduped_
                 pass
             else:
                 deduped_list.append(l[index])
@@ -44,12 +44,12 @@ def max_run(l: list) -> int:
     l_copy = l.copy()  # don't change original list
     max_list = []
 
-    if len(l) == 0 or len(l) == 1:
+    if len(l) == 0 or len(l) == 1:  # simple case to avoid unnecessary for loop
         return len(l)
     for i in l_copy:
         max_list.append(l_copy[0])
         l_copy.pop(0)
-        while len(l_copy) >= 1 and max_list[0] == l_copy[0]:
+        while len(l_copy) >= 1 and max_list[0] == l_copy[0]:  # check for len to avoid index errors
             max_list.append(l_copy[0])
             l_copy.pop(0)
         if len(max_list) >= longest_run:

@@ -21,13 +21,13 @@ class TestMaxRun(unittest.TestCase):
     def test_run(self):
         before = [1, 1, 3, 3, 3, 5]
         saved = before.copy()
-        # self.assertEqual(sweep.max_run(before), 3)
-        # self.assertEqual(before, saved)
-        # self.assertEqual(sweep.max_run([]), 0)
-        # self.assertEqual(sweep.max_run([42]), 1)
-        # self.assertEqual(sweep.max_run([1, 2, 3]), 1)
-        # self.assertEqual(sweep.max_run([3, 3, 3, 2, 3]), 3)
-        # self.assertEqual(sweep.max_run([1, 2, 2, 3]), 2)
+        self.assertEqual(sweep.max_run(before), 3)
+        self.assertEqual(before, saved)
+        self.assertEqual(sweep.max_run([]), 0)
+        self.assertEqual(sweep.max_run([42]), 1)
+        self.assertEqual(sweep.max_run([1, 2, 3]), 1)
+        self.assertEqual(sweep.max_run([3, 3, 3, 2, 3]), 3)
+        self.assertEqual(sweep.max_run([1, 2, 2, 3]), 2)
         self.assertEqual(sweep.max_run([3, 4, 5, 5, 5]), 3)
 
 class TestDedup(unittest.TestCase):
