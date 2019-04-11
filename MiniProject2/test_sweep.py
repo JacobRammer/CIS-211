@@ -1,4 +1,4 @@
-from MiniProject2 import sweep
+import sweep
 import unittest
 import logging
 logging.basicConfig()
