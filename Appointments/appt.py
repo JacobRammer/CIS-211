@@ -66,10 +66,8 @@ class Appt:
         return self.finish.__gt__(other.start)
 
     def intersect(self, other: "Appt") -> "Appt":
-        """Display the overlap time between two appointments if there are overlaps"""
+        """Calculate the overlap time between two appointments if there are overlaps"""
 
-        # print("Oh no, a conflict in the schedule!")  # TODO uncomment
-        # TODO add other more conditional calculations?
         if self.finish < other.finish:
             return Appt(other.start, self.finish, f" | {self.desc} and {other.desc}")
         if other.finish > other.finish:
@@ -78,9 +76,6 @@ class Appt:
             return Appt(self.start, other.finish, f" | {self.desc} and {other.desc}")
         if other.start > self.start:
             return Appt(other.start, other.finish, f" | {other.desc} and {self.desc}")
-
-        # else:
-        #     return Appt(other.start, self.finish, f" | {self.desc} and {other.desc}")
 
 
 class Agenda(list):
