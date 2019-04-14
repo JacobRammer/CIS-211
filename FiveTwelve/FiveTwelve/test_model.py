@@ -10,6 +10,11 @@ from model import Vec, Board
 import unittest
 import sys
 
+# board = model.Board()
+# board.place_tile()
+# print(board.tiles)
+# board.place_tile()
+# print(board.tiles)
 
 class TestVec(unittest.TestCase):
 
@@ -43,6 +48,34 @@ class TestBoardConstructor(unittest.TestCase):
         self.assertEqual(board.tiles, [[None, None, None, None, None],
                                  [None, None, None, None, None],
                                  [None, None, None, None, None]])
+
+    def test_constructed_empties(self):
+        """A newly constructed Board should always have at least
+        one empty space.
+        """
+        board = model.Board()
+        self.assertTrue(board.has_empty())
+
+
+class TestScaffolding(unittest.TestCase):
+
+    def test_to_from_list(self):
+        """to_list and from_list should be inverse"""
+        board = model.Board()
+        as_list = [[0, 2, 2, 4], [2, 0, 2, 8], [8, 2, 2, 4], [4, 2, 2, 0]]
+        board.from_list(as_list)
+        self.assertEqual(board.to_list(), as_list)
+
+    def test_from_to(self):
+        """to_list and from_list should be inverse"""
+        board = model.Board()
+        board.place_tile()
+        board.place_tile(value=32)
+        board.place_tile()
+        as_list = board.to_list()
+        board.from_list(as_list)
+        again = board.to_list()
+        self.assertEqual(as_list, again)
 
 
 if __name__ == "__main__":
