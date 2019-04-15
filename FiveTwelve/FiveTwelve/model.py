@@ -118,8 +118,6 @@ class Board(GameElement):
     def has_empty(self) -> bool:
         """Is there at least one grid element without a tile?"""
 
-        # return False
-        # FIXME: Should return True if there is some element with value None
         return len(self._empty_positions()) >= 1
 
     def place_tile(self, value=None):
@@ -187,9 +185,6 @@ class Board(GameElement):
             return
         while True:
             new_pos = pos + dir
-            # print("pos", self[pos])
-            # print("new", self[new_pos])
-            # print(self.tiles)
             if not self.in_bounds(new_pos):  # tile on edge of board
                 break
             if self[new_pos] is None:
@@ -206,24 +201,51 @@ class Board(GameElement):
     def _move_tile(self, old_pos: Vec, new_pos: Vec):
         """Moves tile to given position"""
 
-        # test = self.tiles
-        # old = self[old_pos]
-        # test = self.tiles
-        # old.move_to(new_pos)
-        # test = self.tiles
-        # self[new_pos] = old
-        # test = self.tiles
-        # self[old_pos] = new_pos
-        # test = self.tiles
         self.tiles[new_pos.x][new_pos.y] = self.tiles[old_pos.x][old_pos.y]
         self.tiles[old_pos.x][old_pos.y] = None
 
+    def right(self):
+        """Slide the tile to the right"""
 
-def score(self) -> int:
-    """Calculate a score from the board.
-    (Differs from classic 1024, which calculates score
-    based on sequence of moves rather than state of
-    board.
-    """
-    return 0
-    # FIXME
+        movement_dir = Vec(0, 1)
+        for x_val in self.tiles:
+            for y_val in reversed(x_val):
+                if y_val:
+                    self.slide(Vec(y_val.row, y_val.col), movement_dir)
+
+    def left(self):
+
+        movement_dir = Vec(0, -1)
+        for x_val in self.tiles:
+            for y_val in reversed(x_val):
+                if y_val:
+                    self.slide(Vec(y_val.row, y_val.col), movement_dir)
+
+    def up(self):
+        movement_dir = Vec(-1, 0)
+        for x_val in self.tiles:
+            for y_val in reversed(x_val):
+                if y_val:
+                    self.slide(Vec(y_val.row, y_val.col), movement_dir)
+
+    def down(self):
+        movement_dir = Vec(1, 0)
+        for x_val in self.tiles:
+            for y_val in reversed(x_val):
+                if y_val:
+                    self.slide(Vec(y_val.row, y_val.col), movement_dir)
+
+    def score(self) -> int:
+        """Calculate a score from the board.
+        (Differs from classic 1024, which calculates score
+        based on sequence of moves rather than state of
+        board.
+        """
+
+        game_score = 0
+        for row in self.tiles:
+            for col in row:
+                if col is not None:
+                    game_score += col.value
+
+        return game_score
