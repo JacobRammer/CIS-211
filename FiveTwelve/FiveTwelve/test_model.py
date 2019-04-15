@@ -10,6 +10,7 @@ from model import Vec, Board
 import unittest
 import sys
 
+
 # board = model.Board()
 # board.place_tile()
 # print(board.tiles)
@@ -34,6 +35,7 @@ class TestVec(unittest.TestCase):
         self.assertEqual(v1, Vec(8, 7))
         self.assertEqual(v2, Vec(12, 15))
 
+
 class TestBoardConstructor(unittest.TestCase):
 
     def test_default(self):
@@ -46,8 +48,8 @@ class TestBoardConstructor(unittest.TestCase):
     def test_3x5(self):
         board = Board(rows=3, cols=5)
         self.assertEqual(board.tiles, [[None, None, None, None, None],
-                                 [None, None, None, None, None],
-                                 [None, None, None, None, None]])
+                                       [None, None, None, None, None],
+                                       [None, None, None, None, None]])
 
     def test_constructed_empties(self):
         """A newly constructed Board should always have at least
@@ -76,6 +78,116 @@ class TestScaffolding(unittest.TestCase):
         board.from_list(as_list)
         again = board.to_list()
         self.assertEqual(as_list, again)
+
+
+class TestBoundsCheck(unittest.TestCase):
+
+    def test_bounds_default_shape(self):
+        board = model.Board()
+        self.assertTrue(board.in_bounds(Vec(0, 0)))
+        self.assertTrue(board.in_bounds(Vec(3, 3)))
+        self.assertTrue(board.in_bounds(Vec(1, 2)))
+        self.assertTrue(board.in_bounds(Vec(0, 3)))
+        self.assertFalse(board.in_bounds(Vec(-1, 0)))  # off the top
+        self.assertFalse(board.in_bounds(Vec(1, -1)))  # off the left
+        self.assertFalse(board.in_bounds(Vec(4, 3)))  # off the bottom
+        self.assertFalse(board.in_bounds(Vec(1, 4)))  # off the right
+
+    def test_bounds_odd_shape(self):
+        """Non-square board to make sure we're using row and column
+        correctly.
+        """
+        board = model.Board(rows=2, cols=4)
+        self.assertTrue(board.in_bounds(Vec(0, 0)))
+        self.assertTrue(board.in_bounds(Vec(1, 3)))
+        self.assertFalse(board.in_bounds(Vec(3, 1)))
+
+
+class TestSlide(unittest.TestCase):
+
+    def test_slide_left_to_edge(self):
+        """A tile should stop just when it reaches the edge"""
+        board = model.Board()
+        board.from_list([[0, 0, 0, 0],
+                         [0, 0, 2, 0],
+                         [0, 0, 0, 0],
+                         [0, 0, 0, 0]])
+        board.slide(Vec(1, 2), Vec(0, -1))  # Slide the 2 left
+        self.assertEqual(board.to_list(),
+                         [[0, 0, 0, 0],
+                          [2, 0, 0, 0],
+                          [0, 0, 0, 0],
+                          [0, 0, 0, 0]])
+
+    # def test_slide_right_to_edge(self):
+    #     """A tile should stop just when it reaches the edge"""
+    #     board = model.Board()
+    #     board.from_list([[0, 0, 0, 0],
+    #                      [0, 0, 2, 0],
+    #                      [0, 0, 0, 0],
+    #                      [0, 0, 0, 0]])
+    #     board.slide(Vec(1, 2), Vec(0, 1))  # Slide the 2 right
+    #     self.assertEqual(board.to_list(),
+    #                      [[0, 0, 0, 0],
+    #                       [0, 0, 0, 2],
+    #                       [0, 0, 0, 0],
+    #                       [0, 0, 0, 0]])
+    #
+    # def test_slide_already_at_edge(self):
+    #     """A tile already at the edge can't slide farther that way"""
+    #     board = model.Board()
+    #     board.from_list([[0, 0, 0, 0],
+    #                      [0, 0, 0, 4],
+    #                      [0, 0, 0, 0],
+    #                      [0, 0, 0, 0]])
+    #     board.slide(Vec(1, 3), Vec(0, 1))  # To the right
+    #     self.assertEqual(board.to_list(),
+    #                      [[0, 0, 0, 0],
+    #                       [0, 0, 0, 4],
+    #                       [0, 0, 0, 0],
+    #                       [0, 0, 0, 0]])
+    #
+    # def test_empty_wont_slide(self):
+    #     """Sliding an empty position has no effect"""
+    #     board = model.Board()
+    #     board.from_list([[2, 0, 0, 0],
+    #                      [0, 2, 0, 0],
+    #                      [0, 0, 2, 0],
+    #                      [0, 0, 0, 2]])
+    #     board.slide(Vec(1, 0), Vec(0, 1))  # Space 1,0 is empty
+    #     self.assertEqual(board.to_list(),
+    #                      [[2, 0, 0, 0],
+    #                       [0, 2, 0, 0],
+    #                       [0, 0, 2, 0],
+    #                       [0, 0, 0, 2]])
+    #
+    # def test_slide_into_obstacle(self):
+    #     """A tile should stop when it reaches another tile"""
+    #     board = model.Board()
+    #     board.from_list([[2, 0, 0, 0],
+    #                      [0, 2, 4, 0],
+    #                      [0, 0, 2, 0],
+    #                      [0, 0, 0, 2]])
+    #     board.slide(Vec(1, 1), Vec(0, 1))  # Space 1,0 is empty
+    #     self.assertEqual(board.to_list(),
+    #                      [[2, 0, 0, 0],
+    #                       [0, 2, 4, 0],
+    #                       [0, 0, 2, 0],
+    #                       [0, 0, 0, 2]])
+    #
+    # def test_slide_merge(self):
+    #     """Equal tiles merge when they meet"""
+    #     board = model.Board()
+    #     board.from_list([[2, 0, 0, 0],
+    #                      [0, 2, 2, 4],
+    #                      [0, 0, 2, 0],
+    #                      [0, 0, 0, 2]])
+    #     board.slide(Vec(1, 1), Vec(0, 1))
+    #     self.assertEqual(board.to_list(),
+    #                      [[2, 0, 0, 0],
+    #                       [0, 0, 4, 4],
+    #                       [0, 0, 2, 0],
+    #                       [0, 0, 0, 2]])
 
 
 if __name__ == "__main__":
