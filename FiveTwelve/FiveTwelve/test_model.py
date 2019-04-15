@@ -119,75 +119,75 @@ class TestSlide(unittest.TestCase):
                           [0, 0, 0, 0],
                           [0, 0, 0, 0]])
 
-    # def test_slide_right_to_edge(self):
-    #     """A tile should stop just when it reaches the edge"""
-    #     board = model.Board()
-    #     board.from_list([[0, 0, 0, 0],
-    #                      [0, 0, 2, 0],
-    #                      [0, 0, 0, 0],
-    #                      [0, 0, 0, 0]])
-    #     board.slide(Vec(1, 2), Vec(0, 1))  # Slide the 2 right
-    #     self.assertEqual(board.to_list(),
-    #                      [[0, 0, 0, 0],
-    #                       [0, 0, 0, 2],
-    #                       [0, 0, 0, 0],
-    #                       [0, 0, 0, 0]])
-    #
-    # def test_slide_already_at_edge(self):
-    #     """A tile already at the edge can't slide farther that way"""
-    #     board = model.Board()
-    #     board.from_list([[0, 0, 0, 0],
-    #                      [0, 0, 0, 4],
-    #                      [0, 0, 0, 0],
-    #                      [0, 0, 0, 0]])
-    #     board.slide(Vec(1, 3), Vec(0, 1))  # To the right
-    #     self.assertEqual(board.to_list(),
-    #                      [[0, 0, 0, 0],
-    #                       [0, 0, 0, 4],
-    #                       [0, 0, 0, 0],
-    #                       [0, 0, 0, 0]])
-    #
-    # def test_empty_wont_slide(self):
-    #     """Sliding an empty position has no effect"""
-    #     board = model.Board()
-    #     board.from_list([[2, 0, 0, 0],
-    #                      [0, 2, 0, 0],
-    #                      [0, 0, 2, 0],
-    #                      [0, 0, 0, 2]])
-    #     board.slide(Vec(1, 0), Vec(0, 1))  # Space 1,0 is empty
-    #     self.assertEqual(board.to_list(),
-    #                      [[2, 0, 0, 0],
-    #                       [0, 2, 0, 0],
-    #                       [0, 0, 2, 0],
-    #                       [0, 0, 0, 2]])
-    #
-    # def test_slide_into_obstacle(self):
-    #     """A tile should stop when it reaches another tile"""
-    #     board = model.Board()
-    #     board.from_list([[2, 0, 0, 0],
-    #                      [0, 2, 4, 0],
-    #                      [0, 0, 2, 0],
-    #                      [0, 0, 0, 2]])
-    #     board.slide(Vec(1, 1), Vec(0, 1))  # Space 1,0 is empty
-    #     self.assertEqual(board.to_list(),
-    #                      [[2, 0, 0, 0],
-    #                       [0, 2, 4, 0],
-    #                       [0, 0, 2, 0],
-    #                       [0, 0, 0, 2]])
-    #
-    # def test_slide_merge(self):
-    #     """Equal tiles merge when they meet"""
-    #     board = model.Board()
-    #     board.from_list([[2, 0, 0, 0],
-    #                      [0, 2, 2, 4],
-    #                      [0, 0, 2, 0],
-    #                      [0, 0, 0, 2]])
-    #     board.slide(Vec(1, 1), Vec(0, 1))
-    #     self.assertEqual(board.to_list(),
-    #                      [[2, 0, 0, 0],
-    #                       [0, 0, 4, 4],
-    #                       [0, 0, 2, 0],
-    #                       [0, 0, 0, 2]])
+    def test_slide_right_to_edge(self):
+        """A tile should stop just when it reaches the edge"""
+        board = model.Board()
+        board.from_list([[0, 0, 0, 0],
+                         [0, 0, 2, 0],
+                         [0, 0, 0, 0],
+                         [0, 0, 0, 0]])
+        board.slide(Vec(1, 2), Vec(0, 1))  # Slide the 2 right
+        self.assertEqual(board.to_list(),
+                         [[0, 0, 0, 0],
+                          [0, 0, 0, 2],
+                          [0, 0, 0, 0],
+                          [0, 0, 0, 0]])
+
+    def test_slide_already_at_edge(self):
+        """A tile already at the edge can't slide farther that way"""
+        board = model.Board()
+        board.from_list([[0, 0, 0, 0],
+                         [0, 0, 0, 4],
+                         [0, 0, 0, 0],
+                         [0, 0, 0, 0]])
+        board.slide(Vec(1, 3), Vec(0, 1))  # To the right
+        self.assertEqual(board.to_list(),
+                         [[0, 0, 0, 0],
+                          [0, 0, 0, 4],
+                          [0, 0, 0, 0],
+                          [0, 0, 0, 0]])
+
+    def test_empty_wont_slide(self):
+        """Sliding an empty position has no effect"""
+        board = model.Board()
+        board.from_list([[2, 0, 0, 0],
+                         [0, 2, 0, 0],
+                         [0, 0, 2, 0],
+                         [0, 0, 0, 2]])
+        board.slide(Vec(1, 0), Vec(0, 1))  # Space 1,0 is empty
+        self.assertEqual(board.to_list(),
+                         [[2, 0, 0, 0],
+                          [0, 2, 0, 0],
+                          [0, 0, 2, 0],
+                          [0, 0, 0, 2]])
+
+    def test_slide_into_obstacle(self):
+        """A tile should stop when it reaches another tile"""
+        board = model.Board()
+        board.from_list([[2, 0, 0, 0],
+                         [0, 2, 4, 0],
+                         [0, 0, 2, 0],
+                         [0, 0, 0, 2]])
+        board.slide(Vec(1, 1), Vec(0, 1))  # Space 1,0 is empty
+        self.assertEqual(board.to_list(),
+                         [[2, 0, 0, 0],
+                          [0, 2, 4, 0],
+                          [0, 0, 2, 0],
+                          [0, 0, 0, 2]])
+
+    def test_slide_merge(self):
+        """Equal tiles merge when they meet"""
+        board = model.Board()
+        board.from_list([[2, 0, 0, 0],
+                         [0, 2, 2, 4],
+                         [0, 0, 2, 0],
+                         [0, 0, 0, 2]])
+        board.slide(Vec(1, 1), Vec(0, 1))
+        self.assertEqual(board.to_list(),
+                         [[2, 0, 0, 0],
+                          [0, 0, 4, 4],
+                          [0, 0, 2, 0],
+                          [0, 0, 0, 2]])
 
 
 if __name__ == "__main__":

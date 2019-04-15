@@ -164,7 +164,7 @@ class Board(GameElement):
         for i in range(self.rows):
             row_tiles = []
             for j in range(self.cols):
-                if values[i][j] is None:
+                if values[i][j] is 0:
                     row_tiles.append(None)
                 else:
                     val = values[i][j]
@@ -187,11 +187,12 @@ class Board(GameElement):
             return
         while True:
             new_pos = pos + dir
-            print(self.tiles)
-            print(self[new_pos])
+            # print("pos", self[pos])
+            # print("new", self[new_pos])
+            # print(self.tiles)
             if not self.in_bounds(new_pos):  # tile on edge of board
                 break
-            if not self[new_pos] is None:
+            if self[new_pos] is None:
                 self._move_tile(pos, new_pos)
             elif self[pos] == self[new_pos]:
                 self[pos].merge(self[new_pos])
@@ -200,13 +201,22 @@ class Board(GameElement):
             else:
                 # Stuck against another tile
                 break
+            pos = new_pos
 
     def _move_tile(self, old_pos: Vec, new_pos: Vec):
         """Moves tile to given position"""
 
-        self[old_pos].move_to(new_pos)
-        # self[new_pos] = self[old_pos]
-        # self[old_pos] = None
+        # test = self.tiles
+        # old = self[old_pos]
+        # test = self.tiles
+        # old.move_to(new_pos)
+        # test = self.tiles
+        # self[new_pos] = old
+        # test = self.tiles
+        # self[old_pos] = new_pos
+        # test = self.tiles
+        self.tiles[new_pos.x][new_pos.y] = self.tiles[old_pos.x][old_pos.y]
+        self.tiles[old_pos.x][old_pos.y] = None
 
 
 def score(self) -> int:
