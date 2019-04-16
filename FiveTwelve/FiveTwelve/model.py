@@ -1,4 +1,10 @@
 """
+Jacob Rammer
+model.py for FiveTwelve
+Did not attempt extra credit
+"""
+
+"""
 The game state and logic (model component) of 512, 
 a game based on 2048 with a few changes. 
 This is the 'model' part of the model-view-controller
@@ -24,8 +30,6 @@ class Vec():
     Thus we can add two Vecs to get a Vec.
     """
 
-    # Fixme:  We need a constructor, and __add__ method, and __eq__.
-
     def __init__(self, x: int, y: int):
         self.x = x
         self.y = y
@@ -43,7 +47,9 @@ class Vec():
 
         return self.x == other.x and self.y == other.y
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return the string of a Vev"""
+
         return f"({self.x}, {self.y})"
 
 
@@ -58,20 +64,29 @@ class Tile(GameElement):
 
     def __repr__(self):
         """Not like constructor --- more useful for debugging"""
+
         return f"Tile[{self.row},{self.col}]:{self.value}"
 
-    def __str__(self):
+    def __str__(self) -> str:
+        """Return the value of the tile"""
+
         return str(self.value)
 
     def move_to(self, new_pos: Vec):
+        """Move tile to a new position"""
+
         self.row = new_pos.x
         self.col = new_pos.y
         self.notify_all(GameEvent(EventKind.tile_updated, self))
 
-    def __eq__(self, other: "Tile"):
+    def __eq__(self, other: "Tile") -> bool:
+        """Check the equality of a tile"""
+
         return self.value == other.value
 
     def merge(self, other: "Tile"):
+        """Merge a tile with the same value"""
+
         # This tile incorporates the value of the other tile
         self.value = self.value + other.value
         self.notify_all(GameEvent(EventKind.tile_updated, self))
@@ -141,6 +156,7 @@ class Board(GameElement):
         """Test scaffolding: represent each Tile by its
         integer value and empty positions as 0
         """
+
         result = []
         for row in self.tiles:
             row_values = []
@@ -189,9 +205,12 @@ class Board(GameElement):
                 break
             if self[new_pos] is None:
                 self._move_tile(pos, new_pos)
+                Tile.move_to(self[new_pos], Vec(new_pos.x, new_pos.y))
+                # Tile.move_to(self.from_list(self))
             elif self[pos] == self[new_pos]:
                 self[pos].merge(self[new_pos])
                 self._move_tile(pos, new_pos)
+                Tile.move_to(self[new_pos], Vec(new_pos.x, new_pos.y))
                 break  # Stop moving when we merge with another tile
             else:
                 # Stuck against another tile
@@ -214,6 +233,7 @@ class Board(GameElement):
                     self.slide(Vec(y_val.row, y_val.col), movement_dir)
 
     def left(self):
+        """Slide the tile left"""
 
         movement_dir = Vec(0, -1)
         for x_val in self.tiles:
@@ -222,6 +242,8 @@ class Board(GameElement):
                     self.slide(Vec(y_val.row, y_val.col), movement_dir)
 
     def up(self):
+        """slide the tile up"""
+
         movement_dir = Vec(-1, 0)
         for x_val in self.tiles:
             for y_val in reversed(x_val):
@@ -229,6 +251,8 @@ class Board(GameElement):
                     self.slide(Vec(y_val.row, y_val.col), movement_dir)
 
     def down(self):
+        """Slide the tile down"""
+
         movement_dir = Vec(1, 0)
         for x_val in self.tiles:
             for y_val in reversed(x_val):
