@@ -1,3 +1,8 @@
+"""
+Jacob Rammer
+Calculator rpncalc.py
+"""
+
 """Reverse Polish calculator.
 
 This RPN calculator creates an expression tree from
@@ -73,9 +78,9 @@ def rpn_parse(text: str) -> List[expr.Expr]:
         if tok.kind == lex.TokenCat.INT:
             stack.append(expr.IntConst(int(tok.value)))
         elif tok.kind == lex.TokenCat.VAR:
-            var_class = VAR[tok.kind]
+
             right = expr.Var(str(tok.value))
-            stack.append(var_class(str(right)))
+            stack.append(expr.Var(str(right)))
         elif tok.kind == lex.TokenCat.ASSIGN:
             right = stack.pop()
             left = stack.pop()

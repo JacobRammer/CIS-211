@@ -1,6 +1,6 @@
 """
 Jacob Rammer
-
+Calculator expr.py
 """
 
 
@@ -77,14 +77,6 @@ class Plus(BinOP):
         self.opsym = "+"
         self.opname = "Plus"
 
-    # def __str__(self) -> str:
-    #     """Implementations of __str__ should return the expression in algebraic notation"""
-    #
-    #     return f"({str(self.left)} + {str(self.right)})"
-
-    # def __repr__(self) -> str:
-    #     return f"Plus(IntConst({self.left}), {repr(self.right)})"
-
     def eval(self) -> "IntConst":
         """Implementations of eval should return an integer constant."""
         left_val = self.left.eval()
@@ -111,21 +103,6 @@ class Times(BinOP):
 
     def _apply(self, left: int, right: int) -> int:
         return left * right
-
-    # def __str__(self) -> str:
-    #     """Implementations of __str__ should return the expression in algebraic notation"""
-    #     return f"({str(self.left)} * {str(self.right)})"
-
-    # def __repr__(self) -> str:
-    #     """Implementations of __repr__ should return a string that looks like
-    #     the constructor, e.g., Plus(IntConst(5), IntConst(4))
-    #     """
-    #     return f"Times({repr(self.left)}, {repr(self.right)})"
-
-    # def __eq__(self, other: "Expr") -> bool:
-    #     return isinstance(other, Times) and \
-    #            self.left == other.left and \
-    #            self.right == other.right
 
 
 class Div(BinOP):
