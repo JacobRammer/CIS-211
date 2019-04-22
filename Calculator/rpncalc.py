@@ -93,7 +93,7 @@ def rpn_parse(text: str) -> List[expr.Expr]:
     Example:
         rpn_parse("5 3 + 4 * 7")
           => [ Times(Plus(IntConst(5), IntConst(3)), IntConst(4)))),
-               IntConst(7) ]
+               IntConst(7)]
     May raise:  IndexError (imbalanced expression), lex.LexicalError.
     """
 
