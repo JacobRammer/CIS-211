@@ -107,7 +107,6 @@ def rpn_parse(text: str) -> List[expr.Expr]:
             var_class = VAR[tok.kind]
             right = expr.Var(str(tok))
             stack.append(var_class(str(right)))
-            # print(stack)
         # elif tok.kind in ASSIGN:
         #     assign_class = ASSIGN[tok.kind]
         #     right = stack.pop()
