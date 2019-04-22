@@ -110,7 +110,6 @@ def rpn_parse(text: str) -> List[expr.Expr]:
         # elif tok.kind in ASSIGN:
         #     assign_class = ASSIGN[tok.kind]
         #     right = stack.pop()
-        #     # print(right)
         #     left = stack.pop()
         #     # Reverse left and right
         #     stack.append(assign_class(right, left))
