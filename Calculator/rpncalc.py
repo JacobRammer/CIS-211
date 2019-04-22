@@ -35,37 +35,6 @@ VAR = \
 
 def calc(text: str):
     """Read and evaluate a single line formula."""
-    # try:
-    #     tokens = lex.TokenStream(io.StringIO(text))
-    #     stack = []
-    #     while tokens.has_more():
-    #         tok = tokens.take()
-    #         if tok.kind == lex.TokenCat.INT:
-    #             stack.append(expr.IntConst(int(tok.value)))
-    #         elif tok.kind in UNOPS:
-    #             unop_class = UNOPS[tok.kind]
-    #             left = stack.pop()
-    #             stack.append(unop_class(left))
-    #         elif tok.kind in BINOPS:
-    #             binop_class = BINOPS[tok.kind]
-    #             right = stack.pop()
-    #             left = stack.pop()
-    #             stack.append(binop_class(left, right))
-    # except lex.LexicalError as e:
-    #     print(f"*** Lexical error {e}")
-    #     return
-    # except IndexError:
-    #     # Stack underflow means the expression was imbalanced
-    #     print(f"*** Imbalanced RPN expression, missing operand at {tok.value}")
-    #     return
-    # if len(stack) == 0:
-    #     print("(No expression)")
-    # else:
-    #     # For a balanced expression there will be one Expr object
-    #     # on the stack, but if there are more we'll just print
-    #     # each of them
-    #     for exp in stack:
-    #         print(f"{exp} => {exp.eval()}")
 
     try:
         stack = rpn_parse(text)
@@ -74,7 +43,7 @@ def calc(text: str):
         return
     except IndexError:
         # Stack underflow means the expression was imbalanced
-        print(f"*** Imbalanced RPN expression, missing operand at ")
+        print(f"*** Index Error")
         return
     if len(stack) == 0:
         print("(No expression)")
@@ -105,14 +74,8 @@ def rpn_parse(text: str) -> List[expr.Expr]:
             stack.append(expr.IntConst(int(tok.value)))
         elif tok.kind == lex.TokenCat.VAR:
             var_class = VAR[tok.kind]
-            right = expr.Var(str(tok))
+            right = expr.Var(str(tok.value))
             stack.append(var_class(str(right)))
-        # elif tok.kind in ASSIGN:
-        #     assign_class = ASSIGN[tok.kind]
-        #     right = stack.pop()
-        #     left = stack.pop()
-        #     # Reverse left and right
-        #     stack.append(assign_class(right, left))
         elif tok.kind == lex.TokenCat.ASSIGN:
             right = stack.pop()
             left = stack.pop()

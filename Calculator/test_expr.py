@@ -78,5 +78,15 @@ class TestBinop(unittest.TestCase):
         exp = exps[0]
         self.assertEqual(exp.eval(), IntConst(100))
 
+
+class TestVarAssignment(unittest.TestCase):
+
+    def test_env_global(self):
+        exp = rpn_parse("5 4 3 * + x =")[0]
+        self.assertEqual(str(exp), "x = (5 + (4 * 3))")
+        self.assertEqual(exp.eval(), IntConst(17))
+        exp = rpn_parse("x 3 +")[0]
+        self.assertEqual(exp.eval(), IntConst(20))
+
 if __name__ == "__main__":
     unittest.main()

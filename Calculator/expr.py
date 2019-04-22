@@ -246,9 +246,8 @@ class Var(Expr):
             raise UndefinedVariable(f"{self.name} has not been assigned a value")
 
     def assign(self, value: IntConst):
-        var = value
-
-        return var
+        val = ENV[self.name] = value
+        return val
 
 
 class Assign(Expr):
@@ -265,9 +264,7 @@ class Assign(Expr):
         return r_val
 
     def __str__(self) -> str:
-
         return f"{self.left} = {self.right}"
 
     def __repr__(self):
-
         return f"Assign({self.left},{self.right}"
