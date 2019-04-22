@@ -154,6 +154,9 @@ class UnOp(Expr):
 
         return IntConst(self._apply(left_val))
 
+    def __eq__(self, other: Expr):
+        return isinstance(other, UnOp) and self.left == other.left
+
 
 class Neg(UnOp):
     """Negative representation"""
