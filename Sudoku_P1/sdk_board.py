@@ -168,6 +168,25 @@ class Tile(Listenable):
 
         return value in self.candidates
 
+    def remove_candidates(self, used_values: Set[str]):
+        """The used values cannot be a value of this unknown tile.
+        We remove those possibilities from the list of candidates.
+        If there is exactly one candidate left, we set the
+        value of the tile.
+        Returns:  True means we eliminated at least one candidate,
+        False means nothing changed (none of the 'used_values' was
+        in our candidates set).
+        """
+        new_candidates = self.candidates.difference(used_values)
+        if new_candidates == self.candidates:
+            # Didn't remove any candidates
+            return False
+        self.candidates = new_candidates
+        if len(self.candidates) == 1:
+            self.set_value(new_candidates.pop())
+        self.notify_all(TileEvent(self, EventKind.TileChanged))
+        return True
+
 
 # ------------------------------
 #  Board class
@@ -185,9 +204,8 @@ class Board(object):
 
         self.groups = []
         self.tiles: List[List[Tile]] = []
-        l = len(self.tiles)
 
-        for row in range(NROWS):  # create board with unknown values
+        for row in range(NROWS):  # Create board with unknown values
             cols = []
             for col in range(NCOLS):
                 cols.append(Tile(row, col))
@@ -196,7 +214,7 @@ class Board(object):
         for row in self.tiles:  # row groups
             self.groups.append(row)
 
-        for col_i in range(len(self.tiles)):  # Making col groups
+        for col_i in range(len(self.tiles)):  # Making column groups
             col_group = []
             for row_i in range(len(self.tiles)):
                 col_group.append(self.tiles[row_i][col_i])
@@ -234,3 +252,83 @@ class Board(object):
             row_syms.append("".join(values))
 
         return "\n".join(row_syms)
+
+    def is_consistent(self) -> bool:
+        """
+        Check to see if board is valid against Sudoku rules.
+        I.E. No duplicate values in row, columns, groups
+        """
+
+        for group in self.groups:
+            used_values = set()
+            for value in group:
+                if value.value in used_values and value.value != UNKNOWN:
+                    return False
+                used_values.add(value.value)
+
+        return True
+
+    def naked_single(self) -> bool:
+        """
+        Eliminate candidates and check for sole remaining possibilities.
+        Return value True means we crossed off at least one candidate.
+        Return value False means we made no progress
+        """
+
+        naked_single = False
+
+        for group in self.groups:
+            used_values = set()
+            for tile in group:
+                if tile.value != UNKNOWN:
+                    used_values.add(tile.value)
+            for tile in group:
+                if tile.value == UNKNOWN:  # keep true even if return value is false
+                    naked_single = tile.remove_candidates(used_values) or naked_single
+
+        return naked_single
+
+    def hidden_single(self) -> bool:
+        """
+        Using the hidden single technique, find the candidate for a tile
+        """
+
+        # hidden_single = False
+
+        # for group in self.groups:
+        #     leftovers = set(CHOICES)
+        #     for value in CHOICES:
+        #         tile_counter = None
+        #         for tile in group:
+        #             if tile.value == value:
+        #                 break
+        #             if tile.could_be(value):
+        #                 if tile_counter is None:
+        #                     tile_counter = tile
+        #                 else:
+        #                     break
+        #         else:
+        #             if tile_counter:
+        #                 tile_counter.set_value(value)
+        #                 hidden_single = True
+
+        for group in self.groups:
+            leftovers = set(CHOICES)
+            for tile in group:
+                if tile.value in CHOICES:
+                    leftovers.remove(tile.value)
+            for value in leftovers:
+                counter = 0
+                for tiles in group:
+                    if tiles.could_be(value):
+                        counter += 1
+                if counter == 1:
+                    return True
+        return False
+
+    def solve(self):
+        progress = True
+        while progress:
+            progress = self.naked_single()
+            self.hidden_single()
+        return
