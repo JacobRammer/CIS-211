@@ -12,10 +12,10 @@ from typing import List, Union
 from io import IOBase
 
 import logging
+
 logging.basicConfig()
 log = logging.getLogger(__name__)
 log.setLevel(logging.INFO)
-
 
 
 class InputError(Exception):
@@ -23,7 +23,7 @@ class InputError(Exception):
 
 
 def read(f: Union[IOBase, str],
-         board: sdk_board.Board=None) -> sdk_board.Board:
+         board: sdk_board.Board = None) -> sdk_board.Board:
     """Read a Sudoku board from a file.  Pass in a path
     or an already opened file.  Optionally pass in a board to be
     filled.
@@ -50,6 +50,3 @@ def read(f: Union[IOBase, str],
     board.set_tiles(values)
     f.close()
     return board
-
-
-

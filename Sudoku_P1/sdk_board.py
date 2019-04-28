@@ -7,6 +7,7 @@ from sdk_config import CHOICES, UNKNOWN, ROOT
 from sdk_config import NROWS, NCOLS
 import logging
 import enum
+from typing import List, Sequence, Set
 
 """
 A Sudoku board holds a matrix of tiles.
@@ -153,11 +154,83 @@ class Tile(Listenable):
 
         return f"{self.value}"
 
-    # def __repr__(self) -> str:
-    #     """
-    #     Return the representation of a tile with row
-    #     """
+    def __repr__(self) -> str:
+        """
+        Return the representation of a tile with row
+        """
+
+        return f"Tile({self.row}, {self.col}, '{self.value}')"
+
+    def could_be(self, value: str) -> bool:
+        """
+        True iff value is a candidate value for this tile
+        """
+
+        return value in self.candidates
 
 
-test_tile = Tile(1, 1)
-print(test_tile)
+# ------------------------------
+#  Board class
+# ------------------------------
+
+class Board(object):
+    """
+    A board has a matrix of tiles
+    """
+
+    def __init__(self):
+        """
+        The empty board
+        """
+
+        self.groups = []
+        self.tiles: List[List[Tile]] = []
+        l = len(self.tiles)
+
+        for row in range(NROWS):  # create board with unknown values
+            cols = []
+            for col in range(NCOLS):
+                cols.append(Tile(row, col))
+            self.tiles.append(cols)
+
+        for row in self.tiles:  # row groups
+            self.groups.append(row)
+
+        for col_i in range(len(self.tiles)):  # Making col groups
+            col_group = []
+            for row_i in range(len(self.tiles)):
+                col_group.append(self.tiles[row_i][col_i])
+            self.groups.append(col_group)
+
+        for block_row in range(ROOT):  # Block groups
+            for block_col in range(ROOT):
+                group = []
+                for row in range(ROOT):
+                    for col in range(ROOT):
+                        row_addr = (ROOT * block_row) + row
+                        col_addr = (ROOT * block_col) + col
+                        group.append(self.tiles[row_addr][col_addr])
+                self.groups.append(group)
+
+    def set_tiles(self, tile_values: Sequence[Sequence[str]]):
+        """
+        Set the tile values a list of lists or a list of strings
+        """
+
+        for row_num in range(NROWS):
+            for col_num in range(NCOLS):
+                tile = self.tiles[row_num][col_num]
+                tile.set_value(tile_values[row_num][col_num])
+
+    def __str__(self) -> str:
+        """
+        In Sadman Sudoku format
+        """
+
+        row_syms = []
+
+        for row in self.tiles:
+            values = [tile.value for tile in row]
+            row_syms.append("".join(values))
+
+        return "\n".join(row_syms)
