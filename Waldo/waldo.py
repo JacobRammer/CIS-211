@@ -79,12 +79,40 @@ def exists_col_all_waldo(grid: List[List[str]]) -> bool:
 
     found_waldo = False
 
-    for col_i in range(len(grid[0])):
-        for row in grid:
-            if row[col_i] == Waldo:
+    # for col_i in range(len(grid[0])):
+    #     for row in grid:
+    #         if row[col_i] == Waldo:
+    #             found_waldo = True
+    #         else:
+    #             found_waldo = False
+    #
+    # return found_waldo
+
+    for col_i, col in zip(range(len(grid)), grid):
+        index = 0
+        if found_waldo:
+            break
+        for row_i, row in zip(range(len(col)), col):
+            if grid[index][col_i] == Waldo:
                 found_waldo = True
             else:
                 found_waldo = False
+                break
+            index += 1
+
+
+            # else:
+            #     found_waldo = False
+            #     break
+            # print(col)
+            # print(col[col_i])
+
+                    # # print(row_i)
+                    # if row == Waldo:
+                    #     found_waldo = True
+                    # else:
+                    #     found_waldo = False
+                    #     break
 
     return found_waldo
 
