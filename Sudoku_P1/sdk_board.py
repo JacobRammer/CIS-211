@@ -145,7 +145,7 @@ class Tile(Listenable):
         else:
             self.value = UNKNOWN
             self.candidates = set(CHOICES)
-            self.notify_all((TileEvent(self, EventKind.TileChanged)))
+        self.notify_all((TileEvent(self, EventKind.TileChanged)))
 
     def __str__(self) -> str:
         """
