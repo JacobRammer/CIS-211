@@ -313,6 +313,7 @@ class Board(object):
                     """
                     Not sure if needed since the method provides the desired function.
                     But I'm scared to remove it
+                    https://i.redd.it/6b7und8rs1v21.png
                     """
                     hidden_single = False
         return hidden_single
