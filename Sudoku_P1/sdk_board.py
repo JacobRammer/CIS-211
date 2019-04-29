@@ -293,18 +293,35 @@ class Board(object):
         Using the hidden single technique, find the candidate for a tile
         """
 
-        for group in self.groups:
+        # for group in self.groups:
+        #     leftovers = set(CHOICES)
+        #     for tile in group:
+        #         if tile.value in CHOICES:
+        #             leftovers.remove(tile.value)
+        #         for value in leftovers:
+        #             places_to_put_value = []
+        #             for tiles in group:
+        #                 if tiles.could_be(tiles.value):
+        #                     places_to_put_value.append(tiles.value)
+        #                 if len(places_to_put_value) == 1:
+        #                     tiles.set_value(value)
+        #                     return True
+        # return False
+
+        for group in self.tiles:
             leftovers = set(CHOICES)
             for tile in group:
-                if tile.value in CHOICES:
+                if tile.value in leftovers:
                     leftovers.remove(tile.value)
-            for value in leftovers:
-                places_to_put_value = []
-                # for tiles in group:
-                    # if tiles.could_be(value):
-                    #     places_to_put_value.append(tiles.value)
-                if len(places_to_put_value) == 1:
-                    return True
+            for tile_val in leftovers:
+                counter = 0
+                for tiles in group:
+                    if tiles.could_be(tile_val):
+                        counter += 1
+                        test = tiles
+                    if counter == 1:
+                        tiles.set_value(tile_val)
+                        return True
         return False
 
     def solve(self):
