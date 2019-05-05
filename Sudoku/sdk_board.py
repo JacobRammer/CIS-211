@@ -8,9 +8,6 @@ from sdk_config import NROWS, NCOLS
 import logging
 import enum
 from typing import List, Sequence, Set
-import sys
-
-# sys.setrecursionlimit(10000)
 
 """
 A Sudoku board holds a matrix of tiles.
