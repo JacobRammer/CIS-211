@@ -8,6 +8,9 @@ from sdk_config import NROWS, NCOLS
 import logging
 import enum
 from typing import List, Sequence, Set
+# import sys
+#
+# sys.setrecursionlimit(2000)
 
 """
 A Sudoku board holds a matrix of tiles.
@@ -245,13 +248,18 @@ class Board(object):
         In Sadman Sudoku format
         """
 
-        row_syms = []
+        return "\n".join(self.as_list())
 
+    def as_list(self) -> List[str]:
+        """
+        Tile values in a format compatible with set_tiles.
+        """
+
+        row_syms = []
         for row in self.tiles:
             values = [tile.value for tile in row]
             row_syms.append("".join(values))
-
-        return "\n".join(row_syms)
+        return row_syms
 
     def is_consistent(self) -> bool:
         """
@@ -319,8 +327,69 @@ class Board(object):
         return hidden_single
 
     def solve(self):
+        """
+        General solver; guess-and-check combined
+        with constraint propagation
+        """
+
+        self.propagate()
+
+        if self.is_complete():
+            return True
+        if not self.is_consistent():
+            return False
+
+        saved_state = self.as_list()
+        for group in self.groups:
+            tile = self.min_choice_tile()
+            for value in CHOICES:
+                if tile.could_be(value):
+                    tile.set_value(value)
+            if self.solve():
+                return True
+            else:
+                self.set_tiles(saved_state)
+        return False
+
+    def propagate(self):
+        """
+        Repreat solution tactics until we don't make any progress, 
+        whether or not the board is solved.
+        """
+
         progress = True
         while progress:
             progress = self.naked_single()
             self.hidden_single()
         return
+
+    def min_choice_tile(self) -> Tile:
+        """
+        Returns a tile with value UNKNOWN and the minimum number of
+        candidates. There is at least one tile with value UNKNOWN. 
+        """
+
+        smallest_candidate = Tile(0, 0)  # holds the tile with the smallest candidate list
+
+        for row in self.tiles:
+            for col in row:
+                if col.value is UNKNOWN:
+                    if len(col.candidates) < len(smallest_candidate.candidates):
+                        smallest_candidate = col
+
+        return smallest_candidate
+
+    def is_complete(self) -> bool:
+        """
+        Check to each tile's value to make sure the value
+        is not unknown.
+        """
+
+        for row in self.tiles:
+            if self.is_consistent():
+                for tile in row:
+                    if tile.value == UNKNOWN:
+                        return False
+            else:
+                return False
+        return True
