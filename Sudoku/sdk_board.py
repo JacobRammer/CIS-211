@@ -340,10 +340,10 @@ class Board(object):
             return False
 
         saved_state = self.as_list()  # save board state to restore if needed
-        lease_candidates = self.min_choice_tile()  # tile with the smallest candidate list
+        least_candidate = self.min_choice_tile()  # tile with the smallest candidate list
 
-        for candidate in lease_candidates.candidates:
-            lease_candidates.set_value(candidate)
+        for candidate in least_candidate.candidates:
+            least_candidate.set_value(candidate)
             if self.solve():
                 return True
             else:
