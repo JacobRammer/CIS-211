@@ -8,9 +8,9 @@ from sdk_config import NROWS, NCOLS
 import logging
 import enum
 from typing import List, Sequence, Set
-# import sys
-#
-# sys.setrecursionlimit(2000)
+import sys
+
+# sys.setrecursionlimit(10000)
 
 """
 A Sudoku board holds a matrix of tiles.
@@ -339,12 +339,11 @@ class Board(object):
         if not self.is_consistent():
             return False
 
-        saved_state = self.as_list()
-        for group in self.groups:
-            tile = self.min_choice_tile()
-            for value in CHOICES:
-                if tile.could_be(value):
-                    tile.set_value(value)
+        saved_state = self.as_list()  # save board state to restore if needed
+        lease_candidates = self.min_choice_tile()  # tile with the smallest candidate list
+
+        for candidate in lease_candidates.candidates:
+            lease_candidates.set_value(candidate)
             if self.solve():
                 return True
             else:
@@ -353,7 +352,7 @@ class Board(object):
 
     def propagate(self):
         """
-        Repreat solution tactics until we don't make any progress, 
+        Repeat solution tactics until we don't make any progress,
         whether or not the board is solved.
         """
 
@@ -366,16 +365,16 @@ class Board(object):
     def min_choice_tile(self) -> Tile:
         """
         Returns a tile with value UNKNOWN and the minimum number of
-        candidates. There is at least one tile with value UNKNOWN. 
+        candidates. There is at least one tile with value UNKNOWN.
         """
 
         smallest_candidate = Tile(0, 0)  # holds the tile with the smallest candidate list
 
         for row in self.tiles:
-            for col in row:
-                if col.value is UNKNOWN:
-                    if len(col.candidates) < len(smallest_candidate.candidates):
-                        smallest_candidate = col
+            for tile in row:
+                if tile.value is UNKNOWN:
+                    if len(tile.candidates) < len(smallest_candidate.candidates):
+                        smallest_candidate = tile
 
         return smallest_candidate
 
