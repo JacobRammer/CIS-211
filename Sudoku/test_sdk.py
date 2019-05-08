@@ -53,7 +53,7 @@ class TestBoardBuild(unittest.TestCase):
 class TestBoardIO(unittest.TestCase):
 
     def test_read_new_board(self):
-        board = sdk_reader.read(open("data/00-nakedsubset1.sdk"))
+        board = sdk_reader.read(open("sudoku/data/00-nakedsubset1.sdk"))
         as_printed = str(board)
         self.assertEqual(as_printed,
                          "32...14..\n9..4.2..3\n..6.7...9\n8.1..5...\n...1.6...\n...7..1.8\n1...9.5.."

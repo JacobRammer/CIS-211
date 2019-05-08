@@ -1,4 +1,5 @@
 \.idea
-.wolf*
+*.wolf
 \__pycache__
 \.vscode
+*.sh
