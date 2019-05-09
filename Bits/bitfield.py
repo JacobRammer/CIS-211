@@ -59,3 +59,54 @@ class BitField(object):
         """
 
         return (word >> self.bit_width) & self.mask
+
+    def insert(self, value: int, word: int) -> int:
+        """
+        Insert value, which should be in the low order bit and no larger
+        than the bitfield, into the bitfield, which should be zero before
+        insertion. Returns the combined value.
+        Example: Bitfield(3, 5).insert(0b101, 0b110) == 0b101110
+        """
+
+        return value | word
+
+    def extract_signed(self, word: int) -> int:
+        """
+        Extract bits in bitfield as a signed integer.
+        """
+
+        extract_word = (word >> self.from_bit) & self.mask
+        signed_word = sign_extend(extract_word, self.bit_width)
+
+        return signed_word
+
+
+def sign_extend(field: int, width: int) -> int:
+    """
+    Interpret field as a signed integer with width bits.
+    If the sign bit is zero, it is positive.  If the sign bit
+    is negative, the result is sign-extended to be a negative
+    integer in Python.
+    width must be 2 or greater. field must fit in width bits.
+    # Examples:
+    Suppose we have a 3 bit field, and the field
+    value is 0b111 (7 decimal).  Since the high
+    bit is 1, we should interpret it as
+    -2^2 + 2^1  + 2^0, or -4 + 3 = -1
+
+    Suppose we have the same value, decimal 7 or
+    0b0111, but now it's in a 4 bit field.  In that
+    case we should interpret it as 2^2 + 2^1 + 2^0,
+    or 4 + 2 + 1 = 7, a positive number.
+    """
+
+    assert width > 1
+    assert 0 <= field < 1 << (width + 1)
+    sign_bit = 1 << (width - 1)  # will have form 1000... for width of field
+    mask = sign_bit - 1  # will have form 0111... for width of field
+    if field & sign_bit:
+        # It's negative; sign extend it
+        extended = (field & mask) - sign_bit
+        return extended
+    else:
+        return field
