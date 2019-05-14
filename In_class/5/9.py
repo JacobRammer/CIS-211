@@ -73,4 +73,4 @@ def count_1_bits(w: int) -> int:
     return count
 
 
-print(count_1_bits(45))
+print(count_1_bits(98767))
