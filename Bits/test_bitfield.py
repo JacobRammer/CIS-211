@@ -52,7 +52,7 @@ class Test_Sign_Extension(unittest.TestCase):
 class Test_Signed_Extraction(unittest.TestCase):
 
     def test_extract_neg(self):
-        bitfield = BitField(2,4)
+        bitfield = BitField(2, 4)
         field_bits = 0b_101_111_10  # the 111 part is what we want to extract
         self.assertEqual(bitfield.extract_signed(field_bits), -1)
 
@@ -65,11 +65,33 @@ class Test_Signed_Extraction(unittest.TestCase):
 class Test_Signed_Insert(unittest.TestCase):
 
     def test_insert_neg(self):
-        bitfield = BitField(3,5)
+        bitfield = BitField(3, 5)
         packed = bitfield.insert(-1, 0)
         self.assertEqual(packed, 0b000_111_000)
         unpacked = bitfield.extract_signed(packed)
         self.assertEqual(unpacked, -1)
+
+
+class Test_Custom_Case_One(unittest.TestCase):
+
+    def test_case_one(self):
+        x = 0b111000111
+        bitfield_low = BitField(0, 3)
+        bitfield_mid = BitField(4, 5)
+        bitfield_low.insert(x, 1)
+        self.assertEqual(bitfield_low.extract(x), 0b111)  # 7
+        self.assertEqual(bitfield_mid.extract(x), 0)  # middle should still == 0 after insertion
+
+
+class Test_Custom_Case_Two(unittest.TestCase):
+
+    def test_case_two(self):
+        x = 0b111000111
+        middleish_bits = BitField(6, 7)
+        all_bits = BitField(0, 9)
+        self.assertEqual(middleish_bits.extract(x), 3)
+        self.assertEqual(all_bits.extract(x), 0b111000111)  # check to see if x is altered from extraction
+
 
 if __name__ == "__main__":
     unittest.main()

@@ -58,7 +58,7 @@ class BitField(object):
         be an integer between 0 and 7 (0b000 to 0b111)
         """
 
-        return (word >> self.bit_width) & self.mask  # from_bit?
+        return (word >> self.from_bit) & self.mask  # from_bit?
 
     def insert(self, value: int, word: int) -> int:
         """
@@ -68,7 +68,9 @@ class BitField(object):
         Example: Bitfield(3, 5).insert(0b101, 0b110) == 0b101110
         """
 
-        return (word << self.from_bit) | (value & value)
+        value = value & self.mask
+
+        return word | (value << self.from_bit)
 
     def extract_signed(self, word: int) -> int:
         """
@@ -110,3 +112,4 @@ def sign_extend(field: int, width: int) -> int:
         return extended
     else:
         return field
+
