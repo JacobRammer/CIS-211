@@ -31,11 +31,14 @@ class Leaf(FoodTree):
         self.name = name
         self.worries = potential_worries
 
-    def list_dangerous_ingredients(self, danger) -> list:
+    def list_dangerous_ingredients(self, danger: "Danger") -> list:
         result = []
         if danger.oh_no(self):
             result.append(self.name)
         return result
+
+    def __repr__(self):
+        return f"Leaf: Name: {self.name}, Worries: {self.worries}"
 
 
 class Inner(FoodTree):
@@ -50,8 +53,12 @@ class Inner(FoodTree):
     def list_dangerous_ingredients(self, danger) -> list:
         result = []
         for i in self.ingredients:
-            result += i.list_dangerous_ingredients(danger)
+            print(i)
+            result.extend(i.list_dangerous_ingredients(danger))
         return result
+
+    def __repr__(self):
+        return f"Leaf: Ingredient: {self.name}, Ingredient: {self.ingredients}"
 
 
 class Danger:
@@ -67,7 +74,12 @@ class Vegan(Danger):
             return True
         if "dairy" in ingredient.worries:
             return True
+        if "cheese" in ingredient.worries:
+            return True
         return False
+
+    def __repr__(self):
+        return "Danger: Vegan"
 
 
 pizza = Inner("Pizza", [Inner("Sauce", [Leaf("tomato", ["stains"]), Leaf("anchovies", ["meat"])]),
