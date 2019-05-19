@@ -122,7 +122,7 @@ class Instruction(object):
 
     def __str__(self):
         """
-        A string representation looks something like assembly code
+        A string representation looks Registersomething like assembly code
         """
 
         if self.cond is CondFlag.ALWAYS:
@@ -151,7 +151,6 @@ class Instruction(object):
         return word
 
 
-
 #  Interpret an integer (memory word) as an instruction.
 #  This is the decode part of the fetch/decode/execute cycle of the CPU.
 
@@ -167,8 +166,8 @@ def decode(word: int) -> Instruction:
     reg_src2_field_decode = reg_src2_field.extract(word)
     offset_field_decode = offset_field.extract_signed(word)
 
-    instr_field_op = OpCode(instr_field_decode)  # format as OpFlag
-    cond_field_cond = CondFlag(cond_field_decode)  # format as CondFlag
+    # instr_field_op = OpCode(instr_field_decode)  # format as OpFlag
+    # cond_field_cond = CondFlag(cond_field_decode)  # format as CondFlag
 
-    return Instruction(instr_field_op, cond_field_cond, reg_target_field_decode,
+    return Instruction(OpCode(instr_field_decode), CondFlag(cond_field_decode), reg_target_field_decode,
                        reg_src1_field_decode, reg_src2_field_decode, offset_field_decode)

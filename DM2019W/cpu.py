@@ -128,3 +128,34 @@ class CPU(MVCListenable):
         # before we have executed it
         self.notify_all(CPUStep(self, instruction_address, memory_instruction,
                                 instr))
+
+        # execution
+
+        if instr.cond & self.condition:
+            lhs = instr.reg_src1
+            rhs = instr.offset + instr.reg_src2
+            self.pc.put(self.pc.get() + 1)
+            op = instr.op
+            result, self.condition = self.alu.exec(op, lhs, rhs)
+
+            if op == OpCode.STORE:
+                self.memory.put(result, self.registers[instr.reg_target].get())
+            if op == OpCode.LOAD:
+                memory_val = self.memory.get(result)
+                self.registers[instr.reg_target].put(memory_val)
+            if op == OpCode.HALT:
+                self.halted = True
+            else:
+                self.registers[instr.reg_target].put(result)
+        else:
+            self.pc.put(self.pc.get() + 1)
+
+    def run(self, from_addr=0, single_step=False) -> None:
+        self.halted = False
+        self.pc.put(from_addr)
+        step_count = 0
+        while not self.halted:
+            if single_step:
+                input("Step {}; press enter".format(step_count))
+            self.step()
+            step_count += 1
