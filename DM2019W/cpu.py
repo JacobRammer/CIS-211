@@ -131,19 +131,24 @@ class CPU(MVCListenable):
 
         # execution
 
+        # TODO
+        #   Fix this crap. It's spaghetti code and is giving me
+        #   a headache. And add some comments (if I even remember
+        #   how this works in 5 minutes)
+
         if instr.cond & self.condition:
-            lhs = instr.reg_src1
-            rhs = instr.offset + instr.reg_src2
+            lhs = self.registers[instr.reg_src1].get()
+            rhs = self.registers[instr.reg_src2].get() + instr.offset
             self.pc.put(self.pc.get() + 1)
             op = instr.op
             result, self.condition = self.alu.exec(op, lhs, rhs)
 
             if op == OpCode.STORE:
                 self.memory.put(result, self.registers[instr.reg_target].get())
-            if op == OpCode.LOAD:
+            elif op == OpCode.LOAD:
                 memory_val = self.memory.get(result)
                 self.registers[instr.reg_target].put(memory_val)
-            if op == OpCode.HALT:
+            elif op == OpCode.HALT:
                 self.halted = True
             else:
                 self.registers[instr.reg_target].put(result)
@@ -151,6 +156,10 @@ class CPU(MVCListenable):
             self.pc.put(self.pc.get() + 1)
 
     def run(self, from_addr=0, single_step=False) -> None:
+        """
+        Run the Program
+        """
+
         self.halted = False
         self.pc.put(from_addr)
         step_count = 0
