@@ -2,3 +2,129 @@
 Jacob Rammer
 cpu file for DM2019
 """
+
+from instr_format import Instruction, OpCode, CondFlag, decode
+from typing import Tuple
+from memory import Memory
+from register import Register, ZeroRegister
+from mvc import MVCEvent, MVCListenable
+import logging
+
+logging.basicConfig()
+log = logging.getLogger(__name__)
+log.setLevel(logging.INFO)
+
+"""
+Duck machine model DM2019W CPU
+"""
+
+
+class ALU(object):
+    """
+    The arithmetic logical unit (also called a "functional unit"
+    in a modern CPU) executes a selected function but does not
+    otherwise manage CPU state. A modern CPU core may have several
+    ALUs to boost performance by performing multiple operations
+    in parallel, but the Duck Machine has just one ALU in one core.
+    """
+
+    # The ALU chooses one operation to apply basses on a provided
+    # operation code. These are just simple functions of two arguments;
+    # in hardware we would use a multiplexer circuit to connect the
+    # inputs and output to the selected circuitry for each operation.
+
+    ALU_OPS = {
+        # operations
+        OpCode.ADD: lambda x, y: x + y,
+        OpCode.SUB: lambda x, y: x - y,
+        OpCode.MUL: lambda x, y: x * y,
+        OpCode.DIV: lambda x, y: x // y,
+
+        # for memory access operations, load, store the ALU
+        # performs the address calculation
+        OpCode.LOAD: lambda x, y: x + y,
+        OpCode.STORE: lambda x, y: x + y,
+
+        # some operations perform no action
+        OpCode.HALT: lambda x, y: 0
+
+    }
+
+    def exec(self, op: OpCode, int1: int, int2: int) -> Tuple[int, CondFlag]:
+        """
+        Execution of operations from ALU_OPS
+        """
+
+        result = 0
+        try:
+            result = self.ALU_OPS[op](int1, int2)
+        except ZeroDivisionError as ZDE:
+            return 0, CondFlag.V
+        except Exception:
+            logging.DEBUG("Hit exception in CPU.py class ALU")
+
+        # assign flags based on result
+        if result < 0:
+            flag = CondFlag.M
+        elif result > 0:
+            flag = CondFlag.P
+        elif result == 0:
+            flag = CondFlag.Z
+        else:
+            flag = CondFlag.V
+
+        return result, flag
+
+
+class CPUStep(MVCEvent):
+    """
+    CPU is beginning step with PC at a given address
+    """
+
+    def __init__(self, subject: "CPU", pc_addr: int, instr_word: int,
+                 instr: Instruction) -> None:
+        self.subject = subject
+        self.pc_addr = pc_addr
+        self.instr_word = instr_word
+        self.instr = instr
+
+
+class CPU(MVCListenable):
+    """
+    Duck Machine central processing unit (CPU)
+    has 16 registers (including r0 that always holds zero
+    and r15 that holds the program counter), a few
+    flag registers (condition codes, halted state),
+    and some logic for sequencing execution. The CPU
+    does not contain the main memory, but has a buss connecting
+    it to a separate memory.
+    """
+
+    def __init__(self, memory: Memory):
+        super().__init__()
+        self.memory = memory  # not part of the CPU; what we really have is a connection
+        self.registers = [ZeroRegister(), Register(), Register(), Register(),
+                          Register(), Register(), Register(), Register(),
+                          Register(), Register(), Register(), Register(),
+                          Register(), Register(), Register(), Register()]
+        self.condition = CondFlag.ALWAYS
+        self.halted = False
+        self.alu = ALU()
+        self.pc = self.registers[15]
+
+    def step(self):
+        """
+        Heart of the CPU sequencing. Carries out
+        fetch, decode, and execute cycles.
+        """
+
+        instruction_address = self.pc.get()
+        memory_instruction = self.memory.get(instruction_address)
+
+        # decoding
+        instr = decode(memory_instruction)
+
+        # display the CPU state when we have decoded the instruction,
+        # before we have executed it
+        self.notify_all(CPUStep(self, instruction_address, memory_instruction,
+                                instr))

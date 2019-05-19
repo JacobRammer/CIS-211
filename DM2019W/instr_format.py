@@ -12,7 +12,7 @@ from enum import Enum, Flag
 reserved = BitField(31, 31)
 instr_field = BitField(26, 30)
 cond_field = BitField(22, 25)
-red_target_field = BitField(18, 21)
+reg_target_field = BitField(18, 21)
 reg_src1_field = BitField(14, 17)
 reg_src2_field = BitField(10, 13)
 offset_field = BitField(0, 9)
@@ -49,6 +49,12 @@ class CondFlag(Flag):
     P = 4  # Positive
     V = 8  # Overflow (arithmetic error) i.e. divide my 0
     NEVER = 0
+
+    """
+    Z = Zero
+    M = Negative
+    P = Positive
+    """
     ALWAYS = M | Z | P | V
 
     def __str__(self):
@@ -129,11 +135,40 @@ class Instruction(object):
             self.reg_target, self.reg_src1,
             self.reg_src2, self.offset)
 
+    def encode(self) -> int:
+        """
+        Encode instruction as 32-bit integer
+        """
+
+        word = 0
+        word = instr_field.insert(self.op.value, word)
+        word = cond_field.insert(self.cond.value, word)
+        word = reg_target_field.insert(self.reg_target, word)
+        word = reg_src1_field.insert(self.reg_src1, word)
+        word = reg_src2_field.insert(self.reg_src2, word)
+        word = offset_field.insert(self.offset, word)
+
+        return word
+
+
 
 #  Interpret an integer (memory word) as an instruction.
 #  This is the decode part of the fetch/decode/execute cycle of the CPU.
 
-def decode(word: int):
+def decode(word: int) -> Instruction:
     """
     Decode a memory word (32 bit int) into a new instruction
     """
+
+    instr_field_decode = instr_field.extract(word)
+    cond_field_decode = cond_field.extract(word)
+    reg_target_field_decode = reg_target_field.extract(word)
+    reg_src1_field_decode = reg_src1_field.extract(word)
+    reg_src2_field_decode = reg_src2_field.extract(word)
+    offset_field_decode = offset_field.extract_signed(word)
+
+    instr_field_op = OpCode(instr_field_decode)  # format as OpFlag
+    cond_field_cond = CondFlag(cond_field_decode)  # format as CondFlag
+
+    return Instruction(instr_field_op, cond_field_cond, reg_target_field_decode,
+                       reg_src1_field_decode, reg_src2_field_decode, offset_field_decode)
