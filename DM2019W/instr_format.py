@@ -159,15 +159,16 @@ def decode(word: int) -> Instruction:
     Decode a memory word (32 bit int) into a new instruction
     """
 
-    instr_field_decode = instr_field.extract(word)
-    cond_field_decode = cond_field.extract(word)
-    reg_target_field_decode = reg_target_field.extract(word)
-    reg_src1_field_decode = reg_src1_field.extract(word)
-    reg_src2_field_decode = reg_src2_field.extract(word)
-    offset_field_decode = offset_field.extract_signed(word)
+    # instr_field_decode = instr_field.extract(word)
+    # cond_field_decode = cond_field.extract(word)
+    # reg_target_field_decode = reg_target_field.extract(word)
+    # reg_src1_field_decode = reg_src1_field.extract(word)
+    # reg_src2_field_decode = reg_src2_field.extract(word)
+    # offset_field_decode = offset_field.extract_signed(word)
 
     # instr_field_op = OpCode(instr_field_decode)  # format as OpFlag
     # cond_field_cond = CondFlag(cond_field_decode)  # format as CondFlag
 
-    return Instruction(OpCode(instr_field_decode), CondFlag(cond_field_decode), reg_target_field_decode,
-                       reg_src1_field_decode, reg_src2_field_decode, offset_field_decode)
+    return Instruction(OpCode(instr_field.extract(word)), CondFlag(cond_field.extract(word)),
+                       reg_target_field.extract(word), reg_src1_field.extract(word), reg_src2_field.extract(word),
+                       offset_field.extract_signed(word))
