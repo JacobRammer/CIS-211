@@ -135,6 +135,8 @@ class CPU(MVCListenable):
         #   Fix this crap. It's spaghetti code and is giving me
         #   a headache. And add some comments (if I even remember
         #   how this works in 5 minutes)
+        #   Eh, screw it, it works. Discrete is more important at
+        #   the moment
 
         if instr.cond & self.condition:
             lhs = self.registers[instr.reg_src1].get()
