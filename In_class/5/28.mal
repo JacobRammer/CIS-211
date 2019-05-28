@@ -1,0 +1,10 @@
+# Max of two integers
+
+x = read;
+y = read;
+
+if x > y then
+    print x;
+else
+    print y;
+fi
