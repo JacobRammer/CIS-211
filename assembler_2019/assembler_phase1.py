@@ -212,19 +212,16 @@ ASM_MEMOP_PAT = re.compile(r"""
 ASM_JUMP_PAT = re.compile(r"""
     \s*  # Unicode str patterns 0 or more
 
-    # Keeping the same layout from other re's above
-    # optional label
     (
      (?P<label> [a-zA-Z]\w*):
    )?
    \s*
 #---------------
-    (?P<opcode>    JUMP)  
+    (?P<opcode>    JUMP) 
 #---------------
     (/ (?P<predicate> [A-Z]+) )?  
     \s+
-#---------------
-    (?P<target>    r[0-9]+),            
+#---------------          
     (?P<labelref>  [a-zA-Z]\w*)  # Similar to ams_full_pat but replacing scr1, scr2 etc.
 #---------------    
    (
@@ -346,8 +343,8 @@ def transform(lines: List[str]) -> List[str]:
                 pc_relative = mem_addr - address
                 fix_optional_fields(fields)
                 f = fields
-                full = (f"{f['label']}   {f['opcode']}{f['predicate']} " +
-                        f" {f['target']},r0,r15[{pc_relative}] #{label_ref} " +
+                full = (f"{f['label']}   ADD{f['predicate']} " +
+                        f" r15,r0,r15[{pc_relative}] #{label_ref} " +
                         f" {f['comment']}")
                 transformed.append(full)
 
