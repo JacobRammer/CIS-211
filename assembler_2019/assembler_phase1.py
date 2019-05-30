@@ -1,4 +1,9 @@
 """
+Jacob Rammer
+Assembler Phase 1
+"""
+
+"""
 Assembler Phase II for DM2019W assembly language.
 
 This assembler is for fully resolved instructions,
@@ -259,14 +264,6 @@ def parse_line(line: str) -> dict:
     raise SyntaxError("Assembler syntax error in {}".format(line))
 
 
-#   TODO delete this function
-# def fill_defaults(fields: dict) -> None:
-#     """Fill in default values for optional fields of instruction"""
-#     for key, value in INSTR_DEFAULTS:
-#         if fields[key] == None:
-#             fields[key] = value
-
-
 def value_parse(int_literal: str) -> int:
     """Parse an integer literal that could look like
     42 or like 0x2a
@@ -275,21 +272,6 @@ def value_parse(int_literal: str) -> int:
         return int(int_literal, 16)
     else:
         return int(int_literal, 10)
-
-
-# TODO Delete this function
-# def instruction_from_dict(d: dict) -> Instruction:
-#     """Use fields of d to create an Instruction object.
-#     Raises key_error if a needed field is missing or
-#     misspelled (e.g., reg10 instead of r10)
-#     """
-#     opcode = OpCode[d["opcode"]]
-#     pred = CondFlag[d["predicate"]]
-#     target = NAMED_REGS[d["target"]]
-#     src1 = NAMED_REGS[d["src1"]]
-#     src2 = NAMED_REGS[d["src2"]]
-#     offset = int(d["offset"])
-#     return Instruction(opcode, pred, target, src1, src2, offset)
 
 
 def transform(lines: List[str]) -> List[str]:
@@ -326,8 +308,10 @@ def transform(lines: List[str]) -> List[str]:
                 transformed.append(line)
             elif fields["kind"] == AsmSrcKind.DATA:
                 # word = value_parse(fields["value"])
+                log.debug("kind == AsmSrcKind.DATA")
                 transformed.append(line)  # possible change word to line
             elif fields["kind"] == AsmSrcKind.MEMOP:
+                log.debug("kind == AsmSrcKind.MEMOP")
                 label_ref = fields["labelref"]
                 mem_addr = resolved[label_ref]
                 pc_relative = mem_addr - address
@@ -338,6 +322,7 @@ def transform(lines: List[str]) -> List[str]:
                         f" {f['comment']}")
                 transformed.append(full)
             elif fields["kind"] == AsmSrcKind.JUMP:
+                log.debug("kind == AsmSrcKind.JUMP")
                 label_ref = fields["labelref"]
                 mem_addr = resolved[label_ref]
                 pc_relative = mem_addr - address
@@ -420,7 +405,6 @@ def fix_optional_fields(fields: Dict[str, str]):
 
     # comment
     if fields["comment"] is not None:  # comment has a comment, do nothing. Probably could remove this
-
         pass
     else:
         fields["comment"] = ""

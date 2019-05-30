@@ -259,6 +259,7 @@ def assemble(lines: List[str]) -> List[int]:
                 word = instr.encode()
                 instructions.append(word)
             elif fields["kind"] == AsmSrcKind.DATA:
+                log.debug("kind == AsmSrcKind.DATA")
                 word = value_parse(fields["value"])
                 instructions.append(word)
             else:
