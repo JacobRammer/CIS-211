@@ -3,6 +3,7 @@ Jacob Rammer
 
 """
 
+
 # digits = {"0": 0, "1": 1, "2": 2, "3": 3, "4": 4, "5": 5, "6": 6,
 #           "7": 7, "8": 8, "9": 9, "A": 10, "B": 11, "C": 12, "D": 13,
 #           "E": 14, "F": 15}
@@ -51,57 +52,51 @@ Jacob Rammer
 #
 # print(hex_str_to_int_v3("ff"))
 
-# class Tree:
-#     """
-#     Abstract base class
-#     """
-#
-#     def select(self, f) -> str:
-#         """
-#         f is a function from string to bool;
-#         returns concatenation of substrings for which f(t)
-#         is true.
-#         """
-#
-#         raise NotImplementedError("Select method not constructed")
-#
-#
-# class Leaf(Tree):
-#
-#     def __init__(self, f) -> str:
-#         self.text = t
-#
-#     def select(self, f) -> str:
-#
-#         if f(self.text):
-#             return self.text
-#         return ""
-#
-#
-# class Inner(Tree):
-#
-#     def __init__(self):
-#         self.parts = []
-#
-#     def append(self, t: str):
-#         self.parts.append(t)
-#
-#     def select(self, f) -> str:
-#         result = ""
-#         for part in self.parts:
-#             result += part.select(f)
-#         return result
-#
-#
-# t = Inner()
-# s = Inner()
-# s.append(Leaf("foo"))
-# s.append(Leaf("river"))
-# t.append(s)
-# t.append(Leaf("foobaz"))
-#
-# result = t.select(lambda x: len(x) <= 5)  # expect "fooriver"
+class Tree:
+    """Abstract base class"""
 
+    def select(self, f) -> str:
+        """f is function from string to bool;
+        returns concatenation of substrings
+        for which f(t) is true.
+        """
+        raise NotImplementedError("huh?")
+
+
+class Leaf(Tree):
+    def __init__(self, t: str):
+        self.text = t
+
+    def select(self, f) -> str:
+        if f(self.text):
+            return self.text
+        return ""
+
+
+class Inner(Tree):
+    def __init__(self):
+        self.parts = []
+
+    def append(self, t: str):
+        self.parts.append(t)
+
+    def select(self, f) -> str:
+        # result = ""
+        # for part in self.parts:
+        #    result += part.select(f)
+        # return result
+        return "".join([p.select(f) for p in self.parts])
+
+
+t = Inner()
+s = Inner()
+s.append(Leaf("foo"))
+s.append(Leaf("river"))
+t.append(s)
+t.append(Leaf("foobaz"))
+
+result = t.select(lambda x: len(x) <= 5)
+print(result)  # expect "fooriver"
 """
 All columns have the same sum
 """
@@ -126,6 +121,7 @@ def col_sum(matrix, col_i: int) -> int:
         sum += i[col_i]
 
     return sum
+
 
 m = [[0, 1, 2],
      [2, 1, 0],
