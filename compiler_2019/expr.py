@@ -3,12 +3,14 @@ M Young, January 2019
 Revised March 2019 for compiler project;
 Revised May 2019 to add comparison operations
 """
+from codegen_context import Context
 
 # Global variable NO_VALUE is defined below after IntConst
 
 # One global environment (scope) for
 # the calculator
 ENV = dict()
+
 
 def env_clear():
     """Clear all variables in calculator memory"""
@@ -44,7 +46,6 @@ class Expr(object):
         raise NotImplementedError("__eq__ method not defined for class")
 
 
-
 class IntConst(Expr):
     def __init__(self, value: int):
         self.value = value
@@ -60,6 +61,15 @@ class IntConst(Expr):
 
     def __eq__(self, other: Expr):
         return isinstance(other, IntConst) and self.value == other.eval().value
+
+    def gen(self, context: Context, target: str):
+        """Generate code into the context object.
+        Result of expression evaluation will be
+        left in target register.
+        """
+        label = context.get_const_symbol(self.value)
+        context.add_line(f"    LOAD {target},{label}")
+        return
 
 
 # Globals should normally go at the beginning of the file, but we needed
@@ -80,7 +90,6 @@ class BinOp(Expr):
         right_val = self.right.eval()
         return IntConst(self._apply(left_val.value, right_val.value))
 
-
     def __str__(self) -> str:
         """Implementations of __str__ should return the expression in algebraic notation"""
         return f"({str(self.left)} {self.opsym} {str(self.right)})"
@@ -92,13 +101,24 @@ class BinOp(Expr):
         return f"{self.__class__.__name__}({repr(self.left)}, {repr(self.right)})"
 
     def __eq__(self, other: "Expr") -> bool:
-        return type(self) == type(other) and  \
-            self.left == other.left and \
-            self.right == other.right
+        return type(self) == type(other) and \
+               self.left == other.left and \
+               self.right == other.right
+
+    def opcode(self) -> str:
+        """Which operation code do we use in the generated assembly code?"""
+        raise NotImplementedError("Each binary operator should define the opcode method")
 
     def _opcode(self) -> str:
         """Which operation code do we use in the generated assembly code?"""
         raise NotImplementedError("Each binary operator should define the _opcode method")
+
+    def gen(self, context: Context, target: str):
+        self.left.gen(context, target)
+        reg = context.allocate_register()
+        self.right.gen(context, reg)
+        context.add_line(f"   {self._opcode()}  {target},{target},{reg}")
+        context.free_register(reg)
 
 
 class Plus(BinOp):
@@ -111,6 +131,9 @@ class Plus(BinOp):
     def _apply(self, left: int, right: int) -> int:
         return left + right
 
+    def _opcode(self) -> str:
+        return "ADD"
+
 
 class Minus(BinOp):
     """left - right"""
@@ -121,6 +144,9 @@ class Minus(BinOp):
 
     def _apply(self, left: int, right: int) -> int:
         return left - right
+
+    def _opcode(self) -> str:
+        return "SUB"
 
 
 class Times(BinOp):
@@ -133,6 +159,9 @@ class Times(BinOp):
     def _apply(self, left: int, right: int) -> int:
         return left * right
 
+    def _opcode(self) -> str:
+        return "MUL"
+
 
 class Div(BinOp):
     """left // right"""
@@ -143,6 +172,9 @@ class Div(BinOp):
 
     def _apply(self, left: int, right: int) -> int:
         return left // right
+
+    def _opcode(self) -> str:
+        return "DIV"
 
 
 class UnOp(Expr):
@@ -167,8 +199,9 @@ class UnOp(Expr):
         return f"{self.__class__.__name__}({repr(self.left)})"
 
     def __eq__(self, other: "Expr") -> bool:
-        return type(self) == type(other) and  \
-            self.left == other.left
+        return type(self) == type(other) and \
+               self.left == other.left
+
 
 class Neg(UnOp):
     """~left"""
@@ -213,6 +246,28 @@ class Var(Expr):
     def assign(self, value: IntConst):
         ENV[self.name] = value
 
+    def get_var_symbol(self, name: str) -> str:
+        """Returns the name of the label associated
+        with a constant value, and remembers to
+        declare it at the end of the source code.
+        """
+        label = f"var_{name}"
+        self.vars[name] = label
+        return label
+
+    def lvalue(self, context: Context) -> str:
+        """Return the label that the compiler will use for this variable"""
+        return context.get_var_symbol(self.name)
+
+    def gen(self, context: Context, target: str):
+        """Generate code into the context object.
+        Result of expression evaluation will be
+        left in target register.
+        """
+        label = context.get_var_symbol(self.name)
+        context.add_line(f"    LOAD {target},{label}")
+        return
+
 
 class Assign(Expr):
     """Assignment:  x = E represented as Assign(x, E)"""
@@ -232,6 +287,12 @@ class Assign(Expr):
         r_val = self.right.eval()
         self.left.assign(r_val)
         return r_val
+
+    def gen(self, context: Context, target: str):
+        """Store value of expression into variable"""
+        loc = self.left.lvalue(context)
+        self.right.gen(context, target)
+        context.add_line(f"   STORE  {target},{loc}")
 
 
 class Control(Expr):
@@ -269,6 +330,15 @@ class Seq(Control):
         discard = self.left.eval()
         return self.right.eval()
 
+    def gen(self, context: Context, target: str):
+        """
+        Generate code for the lhs then rhs
+        """
+        register = context.allocate_register()
+        self.left.gen(context, target=register)
+        self.right.gen(context, target=register)
+        context.free_register(register)
+
 
 class Print(Control):
     """Print a value.  Returns the value."""
@@ -288,6 +358,11 @@ class Print(Control):
         print(f"Quack!: {result.value}")
         return result
 
+    def gen(self, context: Context, target: str):
+        """We print by storing to the memory-mapped address 511"""
+        self.expr.gen(context, target)
+        context.add_line(f"   STORE  {target},r0,r0[511]")
+
 
 class Read(Expr):
     """Read a value from input"""
@@ -304,6 +379,14 @@ class Read(Expr):
     def eval(self) -> IntConst:
         val = input("Quack! Gimme an int! ")
         return IntConst(int(val))
+
+    def gen(self, context: Context, target: str):
+        """Code generation for a constant reference.
+        Generates code to load the value of that constant
+        from memory.
+        """
+
+        context.add_line(f"   LOAD  {target},r0,r0[510]")
 
 
 class Comparison(Control):
@@ -324,6 +407,7 @@ class Comparison(Control):
     conditions, because it is jumping to the 'else' branch
     or out of the loop.)
     """
+
     def __init__(self, left: Expr, right: Expr):
         self.left = left
         self.right = right
@@ -336,9 +420,9 @@ class Comparison(Control):
         return f"{self.__class__.__name__}({repr(self.left)}, {repr(self.right)})"
 
     def __eq__(self, other: "Expr") -> bool:
-        return type(self) == type(other) and  \
-            self.left == other.left and \
-            self.right == other.right
+        return type(self) == type(other) and \
+               self.left == other.left and \
+               self.right == other.right
 
     def eval(self) -> "IntConst":
         """In the interpreter, relations return 0 or 1.
@@ -355,11 +439,13 @@ class EQ(Comparison):
     def _apply(self, left: int, right: int) -> int:
         return 1 if left == right else 0
 
+
 class NE(Comparison):
     """left != right"""
 
     def _apply(self, left: int, right: int) -> int:
         return 1 if left != right else 0
+
 
 class GT(Comparison):
     """left > right"""
@@ -367,16 +453,19 @@ class GT(Comparison):
     def _apply(self, left: int, right: int) -> int:
         return 1 if left > right else 0
 
+
 class GE(Comparison):
     """left >= right"""
 
     def _apply(self, left: int, right: int) -> int:
         return 1 if left >= right else 0
 
+
 class LT(Comparison):
 
     def _apply(self, left: int, right: int) -> int:
         return 1 if left < right else 0
+
 
 class LE(Comparison):
 
@@ -409,6 +498,7 @@ class While(Control):
             last = self.expr.eval()
             cond_val = self.cond.eval()
         return last
+
 
 class Pass(Control):
     """
@@ -454,6 +544,3 @@ class If(Control):
         else:
             result = self.elsepart.eval()
         return result
-
-
-

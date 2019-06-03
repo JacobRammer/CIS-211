@@ -114,7 +114,7 @@ def address_loop(address_list):
 #     print(i)
 
 date_pattern = re.compile(r"""
-\s* test \s*
+\s* test \s*  # ignore test
 \(  # ignore the (
 (?P<month>
 [A-Za-z]* 
@@ -125,13 +125,14 @@ date_pattern = re.compile(r"""
 [0-9]*
 ), 
 \s
+\+  # out of group, ignore
 (?P<year>
 [0-9]*
 )
 """, re.VERBOSE)
 
-date = " test (April) 18, 2015"
+date = " test (April) 18, +2015"
 
-date_match = date_pattern.search(date)
+date_match = date_pattern.fullmatch(date)
 test = date_match.groupdict()
 print(test)

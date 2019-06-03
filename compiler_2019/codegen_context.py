@@ -48,3 +48,60 @@ class Context(object):
 
         # The available registers
         self.registers = [f"r{i}" for i in range(1, 15)]
+
+        # Instructions in the source code, as a list of
+        # strings.
+        self.assm_lines = []
+
+    def get_const_symbol(self, value: int) -> str:
+        """Returns the name of the label associated
+        with a constant value, and remembers to
+        declare it at the end of the source code.
+        """
+        assert isinstance(value, int)
+        if value < 0:
+            label = f"const_n_{abs(value)}"
+        else:
+            label = f"const_{value}"
+        self.consts[value] = label
+        return label
+
+    def add_line(self, line: str):
+        """Add a line of assembly code"""
+        self.assm_lines.append(line)
+        log.debug("Added line, now {}".format(self.assm_lines))
+
+    def get_lines(self) -> List[str]:
+        """Get all the generated source code, including
+        declarations of variables and constants.
+        """
+        code = self.assm_lines.copy()
+
+        for constval in sorted(self.consts):
+            code.append(f"{self.consts[constval]}:  DATA {constval}")
+        for var_dec in self.vars:
+            code.append(f"{self.vars[var_dec]}: DATA 0")
+
+        return code
+
+    def get_var_symbol(self, name: str) -> str:
+        """Returns the name of the label associated
+        with a constant value, and remembers to
+        declare it at the end of the source code.
+        """
+        label = f"var_{name}"
+        self.vars[name] = label
+        return label
+
+    def allocate_register(self) -> str:
+        """Get the name of a register that is not otherwise
+        occupied. Keep exclusive access until it is returned with
+        free_register(reg).
+        """
+        return self.registers.pop()
+
+    def free_register(self, reg_name: str):
+        """Return the named register to the pool of
+        available registers.
+        """
+        self.registers.append(reg_name)
