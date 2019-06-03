@@ -213,6 +213,13 @@ class Neg(UnOp):
     def _apply(self, left: int) -> int:
         return 0 - left
 
+    def gen(self, context: Context, target: str):
+        """
+        Negation: subtract from 0
+        """
+        self.left.gen(context, target)
+        context.add_line(f"   SUB  {target},r0,{target} # Flip the sign")
+
 
 class Abs(UnOp):
     """Absolute value, represented as @"""
@@ -223,6 +230,14 @@ class Abs(UnOp):
 
     def _apply(self, left: int) -> int:
         return abs(left)
+
+    def gen(self, context: Context, target: str):
+        self.left.gen(context, target)
+        pos = context.new_label("already_positive")
+        context.add_line(f"    SUB  r0,{target},r0  # <Abs>")
+        context.add_line(f"    JUMP/PZ {pos}")
+        context.add_line(f"    SUB {target},r0,{target}  # Flip the sign")
+        context.add_line(f"{pos}:   # </Abs>")
 
 
 class Var(Expr):
@@ -433,8 +448,79 @@ class Comparison(Control):
         return IntConst(self._apply(left_val.value, right_val.value))
 
 
+class Comparison(Control):
+    """A relational operation that may yield 'true' or 'false',
+    In the interpreter, relational operators ==, >=, etc
+    return an integer 0 for False or 1 for True, and the "if" and "while"
+    constructs use that value.
+    In the compiler, "if" and "while" delegate that branching
+    to the relational construct, i.e., x < y does not create
+    a value in a register but rather causes a jump if y - x
+    is positive.  Condition code is the condition code for
+    the conditional JUMP after a subtraction, e.g., Z for
+    equality, P for >, PZ for >=.
+    For each comparison, we give two condition codes: One if
+    we want to branch when the condition is true, and another
+    if we want to branch when the condition is false.
+    (Currently the compiler only uses the cond_code_false
+    conditions, because it is jumping to the 'else' branch
+    or out of the loop.)
+    """
+
+    def __init__(self, left: Expr, right: Expr,
+                 opsym: str, cond_code_true: str, cond_code_false: str):
+        self.left = left
+        self.right = right
+        self.opsym = opsym
+        self.cond_code_true = cond_code_true
+        self.cond_code_false = cond_code_false
+
+    def __str__(self) -> str:
+        return f"{str(self.left)} {self.opsym} {str(self.right)}"
+
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}({repr(self.left)}, {repr(self.right)})"
+
+    def __eq__(self, other: "Expr") -> bool:
+        return type(self) == type(other) and \
+               self.left == other.left and \
+               self.right == other.right
+
+    def eval(self) -> "IntConst":
+        """In the interpreter, relations return 0 or 1.
+        Each concrete subclass must define _apply(int, int)->int
+        """
+        left_val = self.left.eval()
+        right_val = self.right.eval()
+        return IntConst(self._apply(left_val.value, right_val.value))
+
+    def gen(self, context: Context, target: str):
+        """We don't support using relational operators to
+        produce a value (although it would be easy to add).
+        """
+        raise NotImplementedError("Relational operators do not support 'gen'; try 'condjump'")
+
+    def condjump(self, context: Context, target: str, label: str, jump_cond: bool = True):
+        """Generate jump to label conditional on relation. """
+        self.left.gen(context, target)
+        reg = context.allocate_register()
+        self.right.gen(context, reg)
+        if jump_cond:
+            cond = self.cond_code_true
+        else:
+            cond = self.cond_code_false
+        # All relations are implemented by subtraction.  What varies is
+        # the condition code controlling the jump.
+        context.add_line(f"   SUB  r0,{target},{reg}")
+        context.add_line(f"   JUMP/{cond}  {label}  #{self.opsym}")
+        context.free_register(reg)
+
+
 class EQ(Comparison):
     """left == right"""
+
+    def __init__(self, left: Expr, right: Expr):
+        super().__init__(left, right, "==", "Z", "PM")
 
     def _apply(self, left: int, right: int) -> int:
         return 1 if left == right else 0
@@ -443,12 +529,23 @@ class EQ(Comparison):
 class NE(Comparison):
     """left != right"""
 
+    # def _apply(self, left: int, right: int) -> int:
+    #     return 1 if left != right else 0
+
+    def __init__(self, left: Expr, right: Expr):
+        super().__init__(left, right, "!=", "PM", "Z")
+
     def _apply(self, left: int, right: int) -> int:
         return 1 if left != right else 0
 
 
 class GT(Comparison):
     """left > right"""
+
+    # def _apply(self, left: int, right: int) -> int:
+    #     return 1 if left > right else 0
+    def __init__(self, left: Expr, right: Expr):
+        super().__init__(left, right, ">", "P", "ZM")
 
     def _apply(self, left: int, right: int) -> int:
         return 1 if left > right else 0
@@ -457,17 +554,34 @@ class GT(Comparison):
 class GE(Comparison):
     """left >= right"""
 
+    # def _apply(self, left: int, right: int) -> int:
+    #     return 1 if left >= right else 0
+
+    def __init__(self, left: Expr, right: Expr):
+        super().__init__(left, right, ">=", "PZ", "M")
+
     def _apply(self, left: int, right: int) -> int:
         return 1 if left >= right else 0
 
 
 class LT(Comparison):
 
+    # def _apply(self, left: int, right: int) -> int:
+    #     return 1 if left < right else 0
+
+    def __init__(self, left: Expr, right: Expr):
+        super().__init__(left, right, "<", "M", "PZ")
+
     def _apply(self, left: int, right: int) -> int:
         return 1 if left < right else 0
 
 
 class LE(Comparison):
+
+    # def _apply(self, left: int, right: int) -> int:
+    #     return 1 if left <= right else 0
+    def __init__(self, left: Expr, right: Expr):
+        super().__init__(left, right, "<=", "MZ", "P")
 
     def _apply(self, left: int, right: int) -> int:
         return 1 if left <= right else 0
@@ -499,6 +613,16 @@ class While(Control):
             cond_val = self.cond.eval()
         return last
 
+    def gen(self, context: Context, target: str):
+        """Looping"""
+        loop_head = context.new_label("while_do")
+        loop_exit = context.new_label("od")
+        context.add_line(f"{loop_head}:")
+        self.cond.condjump(context, target, loop_exit, jump_cond=False)
+        self.expr.gen(context, target)
+        context.add_line(f"   JUMP  {loop_head}")
+        context.add_line(f"{loop_exit}:")
+
 
 class Pass(Control):
     """
@@ -519,6 +643,9 @@ class Pass(Control):
     def eval(self) -> IntConst:
         """Does nothing, has no value."""
         return NO_VALUE
+
+    def gen(self, context: Context, target: str):
+        pass
 
 
 class If(Control):
@@ -544,3 +671,48 @@ class If(Control):
         else:
             result = self.elsepart.eval()
         return result
+
+    def gen(self, context: Context, target: str):
+        """If"""
+        loop_head = context.new_label("if")
+        loop_exit = context.new_label("fi")
+        context.add_line(f"{loop_head}:")
+        self.cond.condjump(context, target, loop_exit, jump_cond=False)
+        self.thenpart.gen(context, target)
+        self.elsepart.gen(context, self.cond)
+        context.add_line( "   LOAD  ")
+        context.add_line(f"{loop_exit}:")
+
+# class While(Control):
+#
+#     def __init__(self, cond, expr):
+#         self.cond = cond
+#         self.expr = expr
+#
+#     def gen(self, context: Context, target: str):
+#         """Looping"""
+#         loop_head = context.new_label("while_do")
+#         loop_exit = context.new_label("od")
+#         context.add_line(f"{loop_head}:")
+#         self.cond.condjump(context, target, loop_exit, jump_cond=False)
+#         self.expr.gen(context, target)
+#         context.add_line(f"   JUMP  {loop_head}")
+#         context.add_line(f"{loop_exit}:")
+
+
+# class If(Control):
+#
+#     def __init__(self, cond, expr, some):
+#         self.cond = cond
+#         self.expr = expr
+#         self.some = some
+#
+#     def gen(self, context: Context, target: str):
+#         """Looping"""
+#         loop_head = context.new_label("if")
+#         loop_exit = context.new_label("fi")
+#         context.add_line(f"{loop_head}:")
+#         self.cond.condjump(context, target, loop_exit, jump_cond=False)
+#         self.expr.gen(context, target)
+#         context.add_line(f"   JUMP  {loop_head}")
+#         context.add_line(f"{loop_exit}:")
