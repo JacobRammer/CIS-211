@@ -675,13 +675,36 @@ class If(Control):
     def gen(self, context: Context, target: str):
         """If"""
         loop_head = context.new_label("if")
+        loop_else = context.new_label("else")
         loop_exit = context.new_label("fi")
-        context.add_line(f"{loop_head}:")
-        self.cond.condjump(context, target, loop_exit, jump_cond=False)
-        self.thenpart.gen(context, target)
-        self.elsepart.gen(context, self.cond)
-        context.add_line( "   LOAD  ")
-        context.add_line(f"{loop_exit}:")
+
+        context.add_line(loop_exit)
+
+
+
+        # self.cond.condjump(context, target, loop_exit, jump_cond=False)
+        # # self.cond.gen(context, target)
+        # context.add_line(f"   LOAD  {target},{self.cond}")
+        # context.add_line(f"   JUMP/Z  {loop_else}")
+        # self.thenpart.gen(context, target)
+        # context.add_line(f"   STORE  r14,{loop_else}")
+        # context.add_line(f"   JUMP  {loop_exit}")
+        # self.elsepart.gen(context, target)
+        # self.cond.condjump(context, target, loop_exit, jump_cond=False)
+        # context.add_line(loop_else)
+        # context.add_line(f"   STORE  r14 {loop_exit}")
+        # context.add_line(loop_exit)
+
+        #
+        # loop_else = context.new_label("else")
+        # self.cond.gen(context, target)
+        # context.add_line(f"{loop_head}:")
+        # self.cond.condjump(context, target, loop_exit, jump_cond=False)
+        # self.thenpart.gen(context, target)
+        # self.elsepart.gen(context, self.cond)
+        # context.add_line("   LOAD  ")
+        # context.add_line(f"{loop_exit}:")
+
 
 # class While(Control):
 #
