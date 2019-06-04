@@ -46,5 +46,8 @@ def set_nth_bit(x: int, n: int):
     print(bin(x | 1 << n))
     return x | 1 << n
 
+# print(set_nth_bit(20, 2))
 
-print(set_nth_bit(20, 2))
+#  W 2019 number 3 from final
+
+
