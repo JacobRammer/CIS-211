@@ -1,8 +1,8 @@
-"""Expressions (for a calculator)
-M Young, January 2019
-Revised March 2019 for compiler project;
-Revised May 2019 to add comparison operations
 """
+Jacob Rammer
+Expr.py for Mallard
+"""
+
 from codegen_context import Context
 
 # Global variable NO_VALUE is defined below after IntConst
