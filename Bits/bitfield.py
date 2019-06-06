@@ -70,7 +70,7 @@ class BitField(object):
 
         value = value & self.mask
 
-        return word | (value << self.from_bit)
+        return (value << self.from_bit) | word
 
     def extract_signed(self, word: int) -> int:
         """
