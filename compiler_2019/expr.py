@@ -404,48 +404,48 @@ class Read(Expr):
         context.add_line(f"   LOAD  {target},r0,r0[510]")
 
 
-class Comparison(Control):
-    """A relational operation that may yield 'true' or 'false',
-    In the interpreter, relational operators ==, >=, etc
-    return an integer 0 for False or 1 for True, and the "if" and "while"
-    constructs use that value.
-    In the compiler, "if" and "while" delegate that branching
-    to the relational construct, i.e., x < y does not create
-    a value in a register but rather causes a jump if y - x
-    is positive.  Condition code is the condition code for
-    the conditional JUMP after a subtraction, e.g., Z for
-    equality, P for >, PZ for >=.
-    For each comparison, we give two condition codes: One if
-    we want to branch when the condition is true, and another
-    if we want to branch when the condition is false.
-    (Currently the compiler only uses the cond_code_false
-    conditions, because it is jumping to the 'else' branch
-    or out of the loop.)
-    """
+# class Comparison(Control):
+#     """A relational operation that may yield 'true' or 'false',
+#     In the interpreter, relational operators ==, >=, etc
+#     return an integer 0 for False or 1 for True, and the "if" and "while"
+#     constructs use that value.
+#     In the compiler, "if" and "while" delegate that branching
+#     to the relational construct, i.e., x < y does not create
+#     a value in a register but rather causes a jump if y - x
+#     is positive.  Condition code is the condition code for
+#     the conditional JUMP after a subtraction, e.g., Z for
+#     equality, P for >, PZ for >=.
+#     For each comparison, we give two condition codes: One if
+#     we want to branch when the condition is true, and another
+#     if we want to branch when the condition is false.
+#     (Currently the compiler only uses the cond_code_false
+#     conditions, because it is jumping to the 'else' branch
+#     or out of the loop.)
+#     """
+#
+#     def __init__(self, left: Expr, right: Expr):
+#         self.left = left
+#         self.right = right
+#
+#     def __str__(self) -> str:
+#         # Fix this up when you implement code generation
+#         return f"{str(self.left)} <comparison> {str(self.right)}"
+#
+#     def __repr__(self) -> str:
+#         return f"{self.__class__.__name__}({repr(self.left)}, {repr(self.right)})"
+#
+#     def __eq__(self, other: "Expr") -> bool:
+#         return type(self) == type(other) and \
+#                self.left == other.left and \
+#                self.right == other.right
 
-    def __init__(self, left: Expr, right: Expr):
-        self.left = left
-        self.right = right
-
-    def __str__(self) -> str:
-        # Fix this up when you implement code generation
-        return f"{str(self.left)} <comparison> {str(self.right)}"
-
-    def __repr__(self) -> str:
-        return f"{self.__class__.__name__}({repr(self.left)}, {repr(self.right)})"
-
-    def __eq__(self, other: "Expr") -> bool:
-        return type(self) == type(other) and \
-               self.left == other.left and \
-               self.right == other.right
-
-    def eval(self) -> "IntConst":
-        """In the interpreter, relations return 0 or 1.
-        Each concrete subclass must define _apply(int, int)->int
-        """
-        left_val = self.left.eval()
-        right_val = self.right.eval()
-        return IntConst(self._apply(left_val.value, right_val.value))
+    # def eval(self) -> "IntConst":
+    #     """In the interpreter, relations return 0 or 1.
+    #     Each concrete subclass must define _apply(int, int)->int
+    #     """
+    #     left_val = self.left.eval()
+    #     right_val = self.right.eval()
+    #     return IntConst(self._apply(left_val.value, right_val.value))
 
 
 class Comparison(Control):
